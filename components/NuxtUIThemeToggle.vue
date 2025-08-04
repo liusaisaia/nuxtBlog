@@ -1,26 +1,20 @@
 <template>
-  <UButton
-    :icon="isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'"
-    color="gray"
-    variant="ghost"
-    aria-label="主题切换"
-    @click="toggleColorMode"
-  />
+  <button
+    class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+    @click="toggleTheme"
+  >
+    <span v-if="isDark">🌙</span>
+    <span v-else>☀️</span>
+  </button>
 </template>
 
 <script setup lang="ts">
 const colorMode = useColorMode()
 
-const isDark = computed({
-  get () {
-    return colorMode.value === 'dark'
-  },
-  set () {
-    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
-  }
-})
+const isDark = computed(() => colorMode.value === 'dark')
 
-const toggleColorMode = () => {
-  isDark.value = !isDark.value
+function toggleTheme() {
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+  console.log('切换后的主题偏好:', colorMode.preference)
 }
 </script>

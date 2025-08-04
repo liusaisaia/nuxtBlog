@@ -48,7 +48,7 @@
           </UButton>
 
           <!-- Theme Toggle -->
-          <UColorModeButton />
+          <NuxtUIThemeToggle />
 
           <!-- Mobile Menu Button -->
           <UButton
@@ -85,6 +85,7 @@
 const navItems = [
   { to: '/', label: '首页' },
   { to: '/blog', label: '博客' },
+  { to: '/theme-demo', label: '主题演示' },
   { to: '/about', label: '关于' }
 ] as const
 

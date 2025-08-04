@@ -1,1 +1,16 @@
-@import 'tailwindcss';
+
+
+@theme {
+  /* Your custom theme definitions here */
+}
+
+/* 确保暗色模式正确应用 */
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
+}
+
+
