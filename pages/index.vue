@@ -7,8 +7,8 @@
       description="专注于现代前端技术，分享 Vue、React、TypeScript 等技术经验，记录我的学习成长和项目实践。"
       :badge="{ text: '欢迎来到我的技术博客', icon: 'i-heroicons-sparkles' }"
       :buttons="[
-        { label: '开始阅读', to: '/blog', icon: 'i-heroicons-book-open', class: 'px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300' },
-        { label: '了解更多', to: '/about', icon: 'i-heroicons-information-circle', color: 'neutral', variant: 'outline', class: 'px-8 py-4 border-2 border-gray-300 dark:border-gray-600 hover:border-green-500 dark:hover:border-green-400 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-semibold transition-all duration-300' }
+        { label: '开始阅读', to: '/blog', icon: 'i-heroicons-book-open', class: 'px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-rd-2 no-underline' },
+        { label: '了解更多', to: '/about', icon: 'i-heroicons-information-circle', color: 'neutral', variant: 'outline', class: 'px-8 py-4 border-2 border-gray-300 dark:border-gray-600 hover:border-green-500 dark:hover:border-green-400 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-semibold transition-all duration-300 no-underline' }
       ]"
     />
 
