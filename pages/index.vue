@@ -1,55 +1,50 @@
 <template>
   <div>
-    <!-- Hero Section - 参照 Nuxt 官网风格 -->
-    <section class="relative overflow-hidden">
-      <!-- 背景渐变 -->
-      <div class="absolute inset-0 bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"></div>
-
-      <!-- 装饰性背景元素 -->
+    <!--  采用Nuxt官网风格 -->
+    <section class="relative bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 overflow-hidden">
+      <!-- 背景装饰 -->
       <div class="absolute inset-0">
-        <div class="absolute top-20 left-10 w-72 h-72 bg-green-200 dark:bg-green-800 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-70 animate-blob"></div>
-        <div class="absolute top-40 right-10 w-72 h-72 bg-blue-200 dark:bg-blue-800 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-purple-200 dark:bg-purple-800 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        <div class="absolute top-20 left-20 w-72 h-72 bg-green-100 dark:bg-green-900/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div class="absolute top-40 right-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-40 w-72 h-72 bg-purple-100 dark:bg-purple-900/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div class="relative container mx-auto px-4 py-32">
-        <div class="text-center max-w-5xl mx-auto">
-          <!-- 标签 -->
-          <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 mb-8">
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">✨ 基于 Nuxt 4.0 构建</span>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div class="text-center">
+          <div class="inline-flex items-center px-4 py-2 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-sm font-medium mb-8">
+            <Icon name="i-heroicons-sparkles" class="w-4 h-4 mr-2" />
+            欢迎来到我的技术博客
           </div>
 
-          <!-- 主标题 -->
-          <h1 class="text-6xl md:text-8xl font-black mb-8 leading-tight">
-            <span class="block text-gray-900 dark:text-white">现代化的</span>
-            <span class="block bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-              博客体验
+          <h1 class="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            你好，我是
+            <span class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              前端开发者
             </span>
           </h1>
 
-          <!-- 副标题 -->
           <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            使用最新的 Nuxt 4.0 和 Nuxt UI 构建，提供快速、优雅、响应式的阅读体验
+            专注于现代前端技术，分享 Vue、React、TypeScript 等技术经验，
+            记录我的学习成长和项目实践。
           </p>
 
-          <!-- 按钮组 -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <UButton
               to="/blog"
-              size="xl"
-              color="primary"
-              class="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+              size="lg"
+              icon="i-heroicons-book-open"
+              class="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <UIcon name="i-heroicons-rocket-launch" class="w-5 h-5 mr-2" />
-              开始探索
+              开始阅读
             </UButton>
             <UButton
               to="/about"
+              size="lg"
+              color="neutral"
               variant="outline"
-              size="xl"
-              class="px-8 py-4 text-lg font-semibold"
+              icon="i-heroicons-information-circle"
+              class="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 hover:border-green-500 dark:hover:border-green-400 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-semibold transition-all duration-300"
             >
-              <UIcon name="i-heroicons-information-circle" class="w-5 h-5 mr-2" />
               了解更多
             </UButton>
           </div>
@@ -57,147 +52,156 @@
       </div>
     </section>
 
-    <!-- Features Section - 参照 Nuxt 官网的特性展示 -->
-    <section class="py-24 bg-white dark:bg-gray-900">
-      <div class="container mx-auto px-4">
-        <div class="text-center mb-20">
-          <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">
-            为什么选择我们？
+    <!-- 特性介绍 -->
+    <section class="py-20 bg-white dark:bg-gray-900">
+      <div class="container-main">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            我的技能特长
           </h2>
-          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            基于现代技术栈构建，提供卓越的性能和开发体验
+          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            专注于现代前端开发，掌握多种技术栈，热爱分享和学习
           </p>
         </div>
 
-        <div class="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          <!-- 性能优化 -->
-          <div class="group relative">
-            <div class="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-            <div class="relative bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300">
-              <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center mb-6">
-                <UIcon name="i-heroicons-bolt" class="w-8 h-8 text-white" />
-              </div>
-              <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">极速性能</h3>
-              <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                基于 Nuxt 4.0 的服务端渲染和静态生成，配合智能预加载，提供闪电般的页面加载速度
-              </p>
-              <div class="mt-6 flex items-center text-green-600 dark:text-green-400 font-semibold">
-                <span>了解更多</span>
-                <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="text-center p-6">
+            <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="i-heroicons-code-bracket" class="w-8 h-8 text-primary-500" />
             </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              前端开发
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+              精通 Vue、React、TypeScript 等现代前端技术栈，专注用户体验
+            </p>
           </div>
 
-          <!-- 开发体验 -->
-          <div class="group relative">
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-            <div class="relative bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300">
-              <div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-6">
-                <UIcon name="i-heroicons-code-bracket-square" class="w-8 h-8 text-white" />
-              </div>
-              <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">开发友好</h3>
-              <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                完整的 TypeScript 支持，热重载开发，ESLint 代码规范，让开发过程更加高效愉悦
-              </p>
-              <div class="mt-6 flex items-center text-blue-600 dark:text-blue-400 font-semibold">
-                <span>查看文档</span>
-                <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </div>
+          <div class="text-center p-6">
+            <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="i-heroicons-device-phone-mobile" class="w-8 h-8 text-primary-500" />
             </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              响应式设计
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+              擅长移动端适配和响应式布局，确保在各种设备上的完美体验
+            </p>
           </div>
 
-          <!-- 现代设计 -->
-          <div class="group relative">
-            <div class="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-            <div class="relative bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300">
-              <div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mb-6">
-                <UIcon name="i-heroicons-sparkles" class="w-8 h-8 text-white" />
-              </div>
-              <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">现代设计</h3>
-              <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                基于 Nuxt UI 和 Tailwind CSS，支持深色模式，响应式设计，提供一致的用户体验
-              </p>
-              <div class="mt-6 flex items-center text-purple-600 dark:text-purple-400 font-semibold">
-                <span>设计系统</span>
-                <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </div>
+          <div class="text-center p-6">
+            <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="i-heroicons-academic-cap" class="w-8 h-8 text-primary-500" />
             </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              技术分享
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+              热爱学习新技术，乐于分享开发经验和最佳实践
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Latest Posts - 参照 Nuxt 官网的内容展示 -->
-    <section class="py-24 bg-gray-50 dark:bg-gray-800/30">
-      <div class="container mx-auto px-4">
-        <div class="text-center mb-16">
-          <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">
-            最新文章
-          </h2>
-          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            探索最新的技术趋势和开发实践
-          </p>
+    <!-- 最新文章 -->
+    <section class="py-20 bg-gray-50 dark:bg-gray-800">
+      <div class="container-main">
+        <div class="flex items-center justify-between mb-12">
+          <div>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              最新文章
+            </h2>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+              探索我们最新的技术分享和思考
+            </p>
+          </div>
+          <UButton
+            to="/blog"
+            variant="outline"
+            icon="i-heroicons-arrow-right"
+            trailing
+          >
+            查看全部
+          </UButton>
         </div>
 
-        <div class="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div v-if="pending" class="flex justify-center py-12">
+          <div class="loading"></div>
+        </div>
+
+        <div v-else-if="recentPosts?.length" class="blog-grid">
           <article
-            v-for="(post, index) in latestPosts"
-            :key="post.slug"
-            class="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
+            v-for="post in recentPosts"
+            :key="post._path"
+            class="blog-card group cursor-pointer"
+            @click="navigateTo(post._path)"
           >
-            <!-- 文章封面渐变 -->
-            <div class="h-48 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 relative overflow-hidden">
-              <div class="absolute inset-0 bg-black/20"></div>
-              <div class="absolute bottom-4 left-6 right-6">
-                <div class="flex items-center space-x-2 text-white/90 text-sm">
-                  <UIcon name="i-heroicons-calendar" class="w-4 h-4" />
-                  <span>{{ formatDate(post.date) }}</span>
-                  <span>•</span>
-                  <UIcon name="i-heroicons-clock" class="w-4 h-4" />
-                  <span>{{ post.readTime }} 分钟阅读</span>
-                </div>
+            <div class="mb-4">
+              <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <Icon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
+                {{ formatDate(post.date) }}
+                <span class="mx-2">·</span>
+                <Icon name="i-heroicons-clock" class="w-4 h-4 mr-1" />
+                {{ post.readingTime || '5' }} 分钟阅读
               </div>
-            </div>
-
-            <!-- 文章内容 -->
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                <NuxtLink :to="`/blog/${post.slug}`" class="stretched-link">
-                  {{ post.title }}
-                </NuxtLink>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors mb-2">
+                {{ post.title }}
               </h3>
-
-              <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+              <p class="text-gray-600 dark:text-gray-300 line-clamp-3">
                 {{ post.description }}
               </p>
-
-              <!-- 阅读更多按钮 -->
-              <div class="flex items-center text-blue-600 dark:text-blue-400 font-semibold group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                <span>阅读全文</span>
-                <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </div>
             </div>
 
-            <!-- 文章标签 -->
-            <div class="absolute top-4 right-4">
-              <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300">
-                {{ index === 0 ? '最新' : index === 1 ? '热门' : '推荐' }}
+            <div class="flex items-center justify-between">
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="tag in post.tags?.slice(0, 3)"
+                  :key="tag"
+                  class="tag"
+                >
+                  {{ tag }}
+                </span>
               </div>
+              <Icon name="i-heroicons-arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" />
             </div>
           </article>
         </div>
 
-        <!-- 查看更多按钮 -->
-        <div class="text-center mt-12">
-          <UButton
-            to="/blog"
-            variant="outline"
-            size="lg"
-            class="px-8 py-3"
+        <div v-else class="text-center py-12">
+          <Icon name="i-heroicons-document-text" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <p class="text-gray-500 dark:text-gray-400 text-lg">
+            暂无文章，敬请期待...
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 技术栈展示 -->
+    <section class="py-20 bg-white dark:bg-gray-900">
+      <div class="container-main">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            技术栈
+          </h2>
+          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            我们使用最新、最优秀的前端技术构建这个博客系统
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+          <div
+            v-for="tech in techStack"
+            :key="tech.name"
+            class="text-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
-            <UIcon name="i-heroicons-document-text" class="w-5 h-5 mr-2" />
-            查看所有文章
-          </UButton>
+            <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+              <Icon :name="tech.icon" class="w-8 h-8" :class="tech.color" />
+            </div>
+            <h3 class="font-medium text-gray-900 dark:text-white text-sm">
+              {{ tech.name }}
+            </h3>
+          </div>
         </div>
       </div>
     </section>
@@ -205,39 +209,37 @@
 </template>
 
 <script setup lang="ts">
-// 页面元数据
-useHead({
-  title: '首页'
+// SEO 配置
+useSeoMeta({
+  title: '现代博客 - 基于 Nuxt 4 的现代化博客系统',
+  description: '基于 Nuxt 4 构建的现代化博客系统，采用最新的前端技术栈，为您提供优秀的阅读和写作体验。',
+  ogTitle: '现代博客 - 基于 Nuxt 4 的现代化博客系统',
+  ogDescription: '基于 Nuxt 4 构建的现代化博客系统，采用最新的前端技术栈，为您提供优秀的阅读和写作体验。',
+  ogType: 'website'
 })
 
-// 模拟最新文章数据
-const latestPosts = [
-  {
-    slug: 'getting-started-with-nuxt4',
-    title: 'Nuxt 4.0 入门指南',
-    description: '了解 Nuxt 4.0 的新特性和如何开始你的第一个项目',
-    date: '2024-12-01',
-    readTime: 5
-  },
-  {
-    slug: 'nuxt-ui-best-practices',
-    title: 'Nuxt UI 最佳实践',
-    description: '掌握 Nuxt UI 的核心概念和实用技巧',
-    date: '2024-11-28',
-    readTime: 8
-  },
-  {
-    slug: 'vue3-composition-api',
-    title: 'Vue 3 Composition API 深入解析',
-    description: '深入理解 Vue 3 Composition API 的设计理念和使用方法',
-    date: '2024-11-25',
-    readTime: 12
-  }
+// 获取最新文章
+const { data: recentPosts, pending } = await useAsyncData('recent-posts', () =>
+  queryContent()
+    .where({ _partial: false })
+    .sort({ date: -1 })
+    .limit(6)
+    .find()
+)
+
+// 技术栈数据
+const techStack = [
+  { name: 'Nuxt 4', icon: 'i-simple-icons-nuxtdotjs', color: 'text-green-500' },
+  { name: 'Vue 3', icon: 'i-simple-icons-vuedotjs', color: 'text-green-600' },
+  { name: 'TypeScript', icon: 'i-simple-icons-typescript', color: 'text-blue-600' },
+  { name: 'UnoCSS', icon: 'i-simple-icons-unocss', color: 'text-gray-600' },
+  { name: 'Nuxt UI', icon: 'i-heroicons-squares-2x2', color: 'text-primary-500' },
+  { name: 'ESLint', icon: 'i-simple-icons-eslint', color: 'text-purple-600' }
 ]
 
 // 格式化日期
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('zh-CN', {
+function formatDate(date: string | Date) {
+  return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -246,42 +248,10 @@ const formatDate = (dateString: string) => {
 </script>
 
 <style scoped>
-/* 动画效果 */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
-}
-
-/* 拉伸链接效果 */
-.stretched-link::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  content: "";
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

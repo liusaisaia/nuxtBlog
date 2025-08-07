@@ -1,16 +1,941 @@
+/* 在文件开头添加，在uno.css导入之后 */
+@import 'uno.css';
 
-
-@theme {
-  /* Your custom theme definitions here */
+/* 重置body margin */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
 }
 
-/* 确保暗色模式正确应用 */
-html.dark {
-  color-scheme: dark;
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
 }
 
-html.light {
-  color-scheme: light;
+/* 重置所有常用元素的默认样式 */
+h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd, dt, ul, ol, li {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
+* {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
 
+/* 在文件中找到现有的 a 样式（约在第31行），替换为以下内容 */
+
+/* 全局链接样式 - 移除所有下划线 */
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited,
+.prose a,
+.prose a:hover,
+.prose a:focus,
+.prose a:active,
+.prose a:visited {
+  text-decoration: none !important;
+}
+
+/* 可选：如果需要悬停时有其他视觉效果而不是下划线 */
+a:hover,
+.prose a:hover {
+  color: var(--primary-color) !important;
+  opacity: 0.8 !important;
+  transition: color 0.2s ease, opacity 0.2s ease !important;
+}
+
+/* 确保body样式正确 */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* 自定义样式 */
+:root {
+  /* Nuxt风格的主色调 - 更专业的绿色 */
+  --primary-color: #00dc82;
+  --primary-50: #f0fdf4;
+  --primary-100: #dcfce7;
+  --primary-500: #22c55e;
+  --primary-600: #16a34a;
+  --primary-700: #15803d;
+
+  /* 中性色调 - 更专业的灰色系 */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  --text-color: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --bg-color: #ffffff;
+  --border-color: var(--gray-200);
+  --card-bg: #ffffff;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.dark {
+  --text-color: #f9fafb;
+  --bg-color: #111827;
+  --border-color: #374151;
+  --card-bg: #1f2937;
+  --shadow: 0 1px 3px 0 rgb(255 255 255 / 0.1), 0 1px 2px -1px rgb(255 255 255 / 0.1);
+}
+
+/* 响应式容器 */
+.container-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-main {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-main {
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-main {
+    max-width: 1280px;
+  }
+}
+
+/* 博客网格布局 */
+.blog-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .blog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .blog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 文章内容样式 */
+.prose {
+  max-width: none;
+  color: var(--text-color);
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: var(--text-color);
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.prose h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.prose h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.prose a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* 找到第119行左右的这段代码 */
+.prose a:hover {
+/* 删除这行 */
+}
+
+/* 替换为 */
+.prose a:hover {
+  color: var(--primary-color) !important;
+  opacity: 0.8 !important;
+  transition: color 0.2s ease, opacity 0.2s ease !important;
+}
+
+.prose p {
+  margin-bottom: 1.25rem;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+.prose blockquote {
+  border-left: 4px solid var(--primary-color);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.dark .prose blockquote {
+  color: #9ca3af;
+}
+
+/* 代码高亮样式 */
+.prose pre {
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.dark .prose pre {
+  background-color: #1e293b;
+}
+
+.prose code {
+  background-color: #f1f5f9;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dark .prose code {
+  background-color: #334155;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* 卡片样式 */
+/* 文章卡片 - 采用更现代的设计 */
+.blog-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.blog-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.5), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border-color: var(--primary-color);
+}
+
+.blog-card:hover::before {
+  transform: translateX(100%);
+}
+
+.dark .blog-card:hover {
+  box-shadow: 0 20px 25px -5px rgb(255 255 255 / 0.1), 0 8px 10px -6px rgb(255 255 255 / 0.1);
+}
+
+/* 标签样式优化 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, var(--gray-100), var(--gray-50));
+  color: var(--gray-700);
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid var(--gray-200);
+}
+
+.dark .tag {
+  background: linear-gradient(135deg, var(--gray-800), var(--gray-700));
+  color: var(--gray-300);
+  border-color: var(--gray-600);
+}
+
+.tag:hover {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-600));
+  color: white;
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(34, 197, 94 / 0.3);
+}
+
+.dark .tag {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+.tag:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* 动画效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* 导航栏样式 */
+/* Nuxt官网风格渐变背景样式 */
+
+/* 导航标签渐变背景增强样式 */
+.nav-link-gradient {
+  position: relative;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.nav-link-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg,
+    rgba(34, 197, 94, 0.1) 0%,
+    rgba(59, 130, 246, 0.1) 50%,
+    rgba(147, 51, 234, 0.1) 100%);
+  border-radius: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nav-link-gradient:hover::before {
+  opacity: 1;
+}
+
+/* 激活状态的渐变背景 */
+.nav-link-gradient.active {
+  background: linear-gradient(135deg, #22c55e 0%, #3b82f6 50%, #9333ea 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+
+/* 文本渐变效果 */
+.nav-text-gradient {
+  background: linear-gradient(135deg, #22c55e 0%, #3b82f6 50%, #9333ea 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: textGradient 3s ease infinite;
+}
+
+@keyframes textGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 悬停时的脉冲效果 */
+.nav-link-pulse {
+  position: relative;
+}
+
+.nav-link-pulse::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #22c55e, #3b82f6, #9333ea);
+  border-radius: 0.5rem;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.nav-link-pulse:hover::after {
+  opacity: 0.3;
+  transform: scale(1.05);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+/* 暗色模式导航栏渐变 */
+.dark .navbar {
+  background: linear-gradient(135deg, rgba(17,24,39,0.95) 0%, rgba(31,41,55,0.9) 100%);
+  border-bottom: 1px solid rgba(55,65,81,0.3);
+}
+
+/* Hero区域渐变背景 */
+.hero-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 动态渐变动画 */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 光泽效果层 */
+.hero-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.1) 0%,
+    rgba(255,255,255,0.05) 50%,
+    rgba(255,255,255,0.1) 100%);
+  pointer-events: none;
+}
+
+/* 暗色模式Hero渐变 */
+.dark .hero-gradient {
+  background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 25%, #c026d3 50%, #0891b2 75%, #0284c7 100%);
+  background-size: 400% 400%;
+}
+
+/* 替代方案：更简洁的渐变 */
+.hero-gradient-simple {
+  background: linear-gradient(135deg, #00dc82 0%, #3b82f6 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-gradient-simple::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.dark .hero-gradient-simple {
+  background: linear-gradient(135deg, #059669 0%, #2563eb 100%);
+}
+
+/* 卡片悬停效果 */
+.gradient-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(229,231,235,0.5);
+  transition: all 0.3s ease;
+}
+
+.gradient-card:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: rgba(99,102,241,0.3);
+  box-shadow: 0 10px 25px -5px rgba(99,102,241,0.1);
+  transform: translateY(-2px);
+}
+
+.dark .gradient-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid rgba(55,65,81,0.5);
+}
+
+.dark .gradient-card:hover {
+  background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
+  border-color: rgba(99,102,241,0.3);
+  box-shadow: 0 10px 25px -5px rgba(99,102,241,0.2);
+}
+
+/* 可选：添加页面顶部的hero区域渐变背景 */
+.hero-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+
+/* 暗色模式下的hero渐变 */
+.dark .hero-gradient {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+}
+
+/* 其他渐变色彩方案选择 */
+/* 方案1：蓝绿色渐变 */
+.gradient-teal {
+  background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+}
+
+/* 方案2：紫色粉色渐变 */
+.gradient-purple-pink {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 方案3：橙色黄色渐变 */
+.gradient-orange {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* 方案4：绿色蓝色渐变 */
+.gradient-green-blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* 毛玻璃效果的兼容性支持 */
+@supports (backdrop-filter: blur(8px)) {
+  .navbar {
+    backdrop-filter: blur(8px);
+  }
+}
+
+/* 为不支持backdrop-filter的浏览器提供降级方案 */
+@supports not (backdrop-filter: blur(8px)) {
+  .navbar {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+  .dark .navbar {
+    background-color: rgba(17, 24, 39, 0.95);
+  }
+}
+
+.dark .navbar {
+  background-color: rgba(17, 24, 39, 0.8);
+}
+
+/* 响应式网格 */
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 640px) {
+  .blog-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* 加载动画 */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 背景动画 */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* 主题切换动画 */
+.theme-switch-enter-active,
+.theme-switch-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-switch-enter-from,
+.theme-switch-leave-to {
+  opacity: 0;
+  transform: rotate(180deg) scale(0.8);
+}
+
+/* 页面过渡动画 */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* 移除旧的滚动条样式，添加新的完整滚动条样式 */
+
+/* 全局滚动条样式 */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+  border: 2px solid #f9fafb;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+html::-webkit-scrollbar-corner {
+  background: #f9fafb;
+}
+
+/* 暗色模式滚动条样式 - 使用更高优先级 */
+html.dark,
+html.dark body {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+html.dark::-webkit-scrollbar,
+html.dark body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.dark::-webkit-scrollbar-track,
+html.dark body::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 4px;
+}
+
+html.dark::-webkit-scrollbar-thumb,
+html.dark body::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+  border: 2px solid #1f2937;
+}
+
+html.dark::-webkit-scrollbar-thumb:hover,
+html.dark body::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+html.dark::-webkit-scrollbar-corner,
+html.dark body::-webkit-scrollbar-corner {
+  background: #1f2937;
+}
+
+/* 强制应用滚动条样式 */
+* {
+  scrollbar-width: inherit;
+  scrollbar-color: inherit;
+}
+
+*::-webkit-scrollbar {
+  width: inherit;
+  height: inherit;
+}
+
+/* 在文件末尾添加这些终极样式 */
+
+/* 终极链接样式重置 - 确保没有任何下划线 */
+*,
+*::before,
+*::after {
+  text-decoration: none !important;
+}
+
+a,
+a *,
+a::before,
+a::after,
+.prose a,
+.prose a *,
+.prose a::before,
+.prose a::after,
+.nav a,
+.nav a *,
+.blog-card a,
+.blog-card a *,
+.tag a,
+.tag a * {
+  text-decoration: none !important;
+}
+
+/* 所有可能的链接状态 */
+a:link,
+a:visited,
+a:hover,
+a:active,
+a:focus,
+.prose a:link,
+.prose a:visited,
+.prose a:hover,
+.prose a:active,
+.prose a:focus {
+  text-decoration: none !important;
+}
+
+/* 使用CSS变量确保优先级 */
+a {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+}
+
+/* 针对特定组件的样式重置 */
+.nav a,
+.blog-card a,
+.prose a,
+.tag a {
+  text-decoration: none !important;
+}
+
+.nav a:hover,
+.blog-card a:hover,
+.prose a:hover,
+.tag a:hover {
+  text-decoration: none !important;
+}
+
+/* 专门针对NuxtLink的样式重置 */
+.NuxtLink,
+.NuxtLink *,
+.NuxtLink::before,
+.NuxtLink::after,
+.router-link-active,
+.router-link-active *,
+.router-link-active::before,
+.router-link-active::after,
+.router-link-exact-active,
+.router-link-exact-active *,
+.router-link-exact-active::before,
+.router-link-exact-active::after {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
+  text-underline-position: auto !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* NuxtLink所有状态 */
+.NuxtLink:link,
+.NuxtLink:visited,
+.NuxtLink:hover,
+.NuxtLink:active,
+.NuxtLink:focus,
+.router-link-active:link,
+.router-link-active:visited,
+.router-link-active:hover,
+.router-link-active:active,
+.router-link-active:focus,
+.router-link-exact-active:link,
+.router-link-exact-active:visited,
+.router-link-exact-active:hover,
+.router-link-exact-active:active,
+.router-link-exact-active:focus {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
+  text-underline-position: auto !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* 使用最高优先级选择器 */
+html body .NuxtLink,
+html body .router-link-active,
+html body .router-link-exact-active,
+html body a.NuxtLink,
+html body a.router-link-active,
+html body a.router-link-exact-active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
+  text-underline-position: auto !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* 针对导航栏中的NuxtLink */
+nav .NuxtLink,
+nav .router-link-active,
+nav .router-link-exact-active,
+footer .NuxtLink,
+footer .router-link-active,
+footer .router-link-exact-active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
+  text-underline-position: auto !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* 使用CSS变量确保优先级 */
+a {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+}
+
+/* 针对特定组件的样式重置 */
+.nav a,
+.blog-card a,
+.prose a,
+.tag a {
+  text-decoration: none !important;
+}
+
+.nav a:hover,
+.blog-card a:hover,
+.prose a:hover,
+.tag a:hover {
+  text-decoration: none !important;
+}
