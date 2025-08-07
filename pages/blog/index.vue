@@ -2,14 +2,10 @@
   <div class="py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
     <div class="container-main">
       <!-- 页面标题 -->
-      <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          博客文章
-        </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          探索技术世界，分享编程经验与思考
-        </p>
-      </div>
+      <PageHeader
+        title="博客文章"
+        description="探索技术世界，分享编程经验与思考"
+      />
 
       <!-- 搜索和筛选 -->
       <div class="mb-8">
@@ -65,104 +61,13 @@
 
       <div v-else-if="filteredPosts?.length" class="space-y-8">
         <TransitionGroup name="slide-up" tag="div" class="space-y-8">
-          <article
+          <ArticleCard
             v-for="post in filteredPosts"
             :key="post._path"
-            class="blog-card group cursor-pointer"
-            @click="navigateTo(post._path)"
-          >
-            <div class="flex flex-col md:flex-row gap-6">
-              <!-- 文章封面 -->
-              <div v-if="post.image" class="md:w-1/3">
-                <img
-                  :src="post.image"
-                  :alt="post.title"
-                  class="w-full h-48 md:h-full object-cover rounded-lg"
-                >
-              </div>
-
-              <!-- 文章内容 -->
-              <div class="flex-1">
-                <div class="mb-4">
-                  <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
-                    <Icon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
-                    {{ formatDate(post.date) }}
-                    <span class="mx-2">·</span>
-                    <Icon name="i-heroicons-clock" class="w-4 h-4 mr-1" />
-                    {{ post.readingTime || '5' }} 分钟阅读
-                    <span v-if="post.category" class="mx-2">·</span>
-                    <span v-if="post.category" class="text-primary-500 font-medium">
-                      {{ post.category }}
-                    </span>
-                  </div>
-
-                  <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors mb-3">
-                    {{ post.title }}
-                  </h2>
-
-                  <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed line-clamp-3 mb-4">
-                    {{ post.description }}
-                  </p>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <div class="flex flex-wrap gap-2">
-                    <span
-                      v-for="tag in post.tags?.slice(0, 4)"
-                      :key="tag"
-                      class="tag"
-                    >
-                      {{ tag }}
-                    </span>
-                  </div>
-                  <div class="flex items-center text-primary-500 group-hover:text-primary-600 transition-colors">
-                    <span class="mr-2 font-medium">阅读更多</span>
-                    <Icon name="i-heroicons-arrow-right" class="w-5 h-5" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
+            :post="post"
+            layout="detailed"
+          />
         </TransitionGroup>
-
-        <!-- 分页 -->
-        <div v-if="totalPages > 1" class="flex justify-center mt-12">
-          // 搜索框清除按钮（第29行）- 保持不变
-          <UButton
-            icon="i-heroicons-x-mark-20-solid"
-            variant="ghost"
-            color="neutral"
-            class="absolute right-2 top-1/2 -translate-y-1/2"
-            @click="clearSearch"
-          />
-
-          // 分页组件（第135行）- 移除activeButton配置
-          <UPagination
-            v-model="currentPage"
-            :page-count="pageSize"
-            :total="totalPosts"
-            :ui="{
-              item: 'outline'  // 直接使用item属性设置outline样式
-            }"
-          />
-        </div>
-      </div>
-
-      <!-- 空状态 -->
-      <div v-else class="text-center py-16">
-        <Icon name="i-heroicons-document-magnifying-glass" class="w-20 h-20 text-gray-300 dark:text-gray-600 mx-auto mb-6" />
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          {{ searchQuery || selectedCategory ? '未找到匹配的文章' : '暂无文章' }}
-        </h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">
-          {{ searchQuery || selectedCategory ? '尝试调整搜索条件或筛选器' : '敬请期待更多精彩内容' }}
-        </p>
-        <UButton
-          v-if="searchQuery || selectedCategory"
-          @click="clearFilters"
-        >
-          清除筛选条件
-        </UButton>
       </div>
     </div>
   </div>
@@ -231,7 +136,20 @@ const filteredPosts = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   const end = start + pageSize
 
-  return posts.slice(start, end)
+  // 类型转换：将ParsedContent转换为Post类型，确保必需属性存在
+  return posts
+    .slice(start, end)
+    .filter(post => post._path && post.title) // 过滤掉没有_path或title的文章
+    .map(post => ({
+      _path: post._path!, // 使用非空断言，因为已经过滤掉了undefined
+      title: post.title!, // 使用非空断言，因为已经过滤掉了undefined
+      description: post.description,
+      date: post.date,
+      readingTime: post.readingTime,
+      category: post.category,
+      tags: post.tags,
+      image: post.image
+    }))
 })
 
 // 总文章数和总页数

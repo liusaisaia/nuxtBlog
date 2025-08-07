@@ -2,14 +2,10 @@
   <div class="py-12 bg-white dark:bg-gray-900 min-h-screen">
     <div class="container-main max-w-4xl mx-auto">
       <!-- 页面标题 -->
-      <div class="text-center mb-16">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-          关于我们
-        </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-          欢迎来到现代博客，这里是技术分享与思考碰撞的地方
-        </p>
-      </div>
+      <PageHeader 
+        title="关于我们"
+        description="欢迎来到现代博客，这里是技术分享与思考碰撞的地方"
+      />
 
       <!-- 主要内容 -->
       <div class="prose prose-lg max-w-none dark:prose-invert mb-16">
@@ -92,164 +88,27 @@
           <!-- 右侧边栏 -->
           <div class="space-y-8">
             <!-- 统计信息 -->
-            <div class="card p-6">
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                博客统计
-              </h3>
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">文章总数</span>
-                  <span class="font-semibold text-gray-900 dark:text-white">{{ stats.totalPosts }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">分类数量</span>
-                  <span class="font-semibold text-gray-900 dark:text-white">{{ stats.totalCategories }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">标签数量</span>
-                  <span class="font-semibold text-gray-900 dark:text-white">{{ stats.totalTags }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">建站时间</span>
-                  <span class="font-semibold text-gray-900 dark:text-white">2024年</span>
-                </div>
-              </div>
-            </div>
+            <StatsCard
+              title="博客统计"
+              :stats="[
+                { label: '文章总数', value: stats.totalPosts },
+                { label: '分类数量', value: stats.totalCategories },
+                { label: '标签数量', value: stats.totalTags },
+                { label: '建站时间', value: '2024年' }
+              ]"
+            />
 
             <!-- 联系方式 -->
-            <div class="card p-6">
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                联系我们
-              </h3>
-              <div class="space-y-3">
-                <a
-                  href="mailto:contact@example.com"
-                  class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors"
-                >
-                  <Icon name="i-heroicons-envelope" class="w-5 h-5 mr-3" />
-                  contact@example.com
-                </a>
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors"
-                >
-                  <Icon name="i-simple-icons-github" class="w-5 h-5 mr-3" />
-                  GitHub
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors"
-                >
-                  <Icon name="i-simple-icons-twitter" class="w-5 h-5 mr-3" />
-                  Twitter
-                </a>
-              </div>
-            </div>
-
-            <!-- 最新更新 -->
-            <div class="card p-6">
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                最新更新
-              </h3>
-              <div class="space-y-3 text-sm">
-                <div class="flex items-start">
-                  <div class="w-2 h-2 bg-primary-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <div>
-                    <p class="text-gray-900 dark:text-white font-medium">
-                      新增暗黑模式支持
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-400">
-                      2024年1月
-                    </p>
-                  </div>
-                </div>
-                <div class="flex items-start">
-                  <div class="w-2 h-2 bg-primary-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <div>
-                    <p class="text-gray-900 dark:text-white font-medium">
-                      优化移动端体验
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-400">
-                      2024年1月
-                    </p>
-                  </div>
-                </div>
-                <div class="flex items-start">
-                  <div class="w-2 h-2 bg-primary-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <div>
-                    <p class="text-gray-900 dark:text-white font-medium">
-                      升级到 Nuxt 4
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-400">
-                      2024年1月
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ContactCard
+              title="联系我们"
+              :contacts="[
+                { label: 'contact@example.com', href: 'mailto:contact@example.com', icon: 'i-heroicons-envelope' },
+                { label: 'GitHub', href: 'https://github.com', icon: 'i-simple-icons-github', target: '_blank' },
+                { label: 'Twitter', href: 'https://twitter.com', icon: 'i-simple-icons-twitter', target: '_blank' }
+              ]"
+            />
           </div>
         </div>
-
-        <!-- 技术栈详情 -->
-        <section class="mb-16">
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-            技术栈详情
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div
-              v-for="tech in techDetails"
-              :key="tech.name"
-              class="card p-6 text-center hover:shadow-lg transition-all duration-300"
-            >
-              <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full"
-                   :class="tech.bgColor">
-                <Icon :name="tech.icon" class="w-8 h-8" :class="tech.iconColor" />
-              </div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                {{ tech.name }}
-              </h3>
-              <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                {{ tech.description }}
-              </p>
-              <div class="text-xs text-gray-500 dark:text-gray-400">
-                版本: {{ tech.version }}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 开源信息 -->
-        <section class="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 text-center">
-          <Icon name="i-simple-icons-github" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            开源项目
-          </h2>
-          <p class="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
-            这个博客系统是一个开源项目，欢迎大家贡献代码、提出建议或者 Fork 项目进行自定义开发。
-            让我们一起构建更好的技术分享平台！
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <UButton
-              icon="i-simple-icons-github"
-              size="lg"
-              to="https://github.com"
-              target="_blank"
-            >
-              查看源码
-            </UButton>
-            <UButton
-              icon="i-heroicons-star"
-              size="lg"
-              variant="outline"
-              to="https://github.com"
-              target="_blank"
-            >
-              给个 Star
-            </UButton>
-          </div>
-        </section>
       </div>
     </div>
   </div>
