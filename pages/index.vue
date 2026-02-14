@@ -1,163 +1,121 @@
 <template>
   <div>
-    <!-- Hero区域 -->
-    <HeroSection
-      title="你好，我是"
-      highlight="前端开发者"
-      description="专注于现代前端技术，分享 Vue、React、TypeScript 等技术经验，记录我的学习成长和项目实践。"
-      :badge="{ text: '欢迎来到我的技术博客', icon: 'i-heroicons-sparkles' }"
-      :buttons="[
-        { label: '开始阅读', to: '/blog', icon: 'i-heroicons-book-open', class: 'px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-rd-2 no-underline' },
-        { label: '了解更多', to: '/about', icon: 'i-heroicons-information-circle', color: 'neutral', variant: 'outline', class: 'px-8 py-4 border-2 border-gray-300 dark:border-gray-600 hover:border-green-500 dark:hover:border-green-400 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-semibold transition-all duration-300 no-underline' }
-      ]"
-    />
+    <!-- Hero Section -->
+    <HeroSection />
 
-    <!-- 特性介绍 -->
-    <section class="py-20 bg-white dark:bg-gray-900">
-      <div class="container-main">
-        <PageHeader
-          title="我的技能特长"
-          description="专注于现代前端开发，掌握多种技术栈，热爱分享和学习"
-        />
+    <!-- Products Section -->
+    <section id="products" class="relative py-32 overflow-hidden">
+      <!-- Section Divider Glow -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent"></div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <FeatureCard
-            icon="i-heroicons-code-bracket"
-            title="前端开发"
-            description="精通 Vue、React、TypeScript 等现代前端技术栈，专注用户体验"
-          />
-          <FeatureCard
-            icon="i-heroicons-device-phone-mobile"
-            title="响应式设计"
-            description="擅长移动端适配和响应式布局，确保在各种设备上的完美体验"
-          />
-          <FeatureCard
-            icon="i-heroicons-academic-cap"
-            title="技术分享"
-            description="热爱学习新技术，乐于分享开发经验和最佳实践"
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <div class="mb-16 text-center">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">技术栈</h2>
+          <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            利用 JavaScript 生态系统中最先进的工具，提供无与伦比的开发体验。
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+          <ProductCard
+            v-for="product in products"
+            :key="product.name"
+            v-bind="product"
           />
         </div>
       </div>
     </section>
 
-    <!-- 最新文章 -->
-    <section class="py-20 bg-gray-50 dark:bg-gray-800">
-      <div class="container-main">
-        <div class="flex items-center justify-between mb-12">
+    <!-- Recent Posts Section -->
+    <section id="posts" class="py-32 border-t border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-end justify-between mb-12">
           <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              最新文章
-            </h2>
-            <p class="text-xl text-gray-600 dark:text-gray-300">
-              探索我们最新的技术分享和思考
-            </p>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">最新文章</h2>
+            <p class="text-gray-600 dark:text-gray-400">深入探讨现代 Web 开发技术。</p>
           </div>
-          <UButton
-            to="/blog"
-            variant="outline"
-            icon="i-heroicons-arrow-right"
-            trailing
+          <NuxtLink
+            to="/posts"
+            class="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             查看全部
-          </UButton>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </NuxtLink>
         </div>
 
-        <div v-if="pending" class="flex justify-center py-12">
-          <div class="loading"></div>
-        </div>
-
-        <div v-else-if="typedRecentPosts?.length" class="blog-grid">
-          <ArticleCard
-            v-for="post in typedRecentPosts"
-            :key="post._path"
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <PostCard
+            v-for="post in recentPosts"
+            :key="post.path"
             :post="post"
-            layout="compact"
           />
         </div>
-      </div>
-    </section>
 
-    <!-- 技术栈展示 -->
-    <section class="py-20 bg-white dark:bg-gray-900">
-      <div class="container-main">
-        <PageHeader
-          title="技术栈"
-          description="我们使用最新、最优秀的前端技术构建这个博客系统"
-        />
-
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-          <TechStackCard
-            v-for="tech in techStack"
-            :key="tech.name"
-            :tech="tech"
-          />
+        <div class="mt-12 text-center sm:hidden">
+           <NuxtLink
+            to="/posts"
+            class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            查看全部
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </NuxtLink>
         </div>
       </div>
     </section>
   </div>
 </template>
 
-<script setup lang="ts">
-// SEO 配置
-useSeoMeta({
-  title: '现代博客 - 基于 Nuxt 4 的现代化博客系统',
-  description: '基于 Nuxt 4 构建的现代化博客系统，采用最新的前端技术栈，为您提供优秀的阅读和写作体验。',
-  ogTitle: '现代博客 - 基于 Nuxt 4 的现代化博客系统',
-  ogDescription: '基于 Nuxt 4 构建的现代化博客系统，采用最新的前端技术栈，为您提供优秀的阅读和写作体验。',
-  ogType: 'website'
-})
-
-// 获取最新文章
-const { data: recentPosts, pending } = await useAsyncData('recent-posts', () =>
-  queryContent()
-    .where({ _partial: false })
-    .sort({ date: -1 })
-    .limit(6)
-    .find()
-)
-
-// 类型转换：将ParsedContent转换为Post类型
-const typedRecentPosts = computed(() => {
-  if (!recentPosts.value) return []
-  return recentPosts.value
-    .filter(post => post._path && post.title) // 过滤掉没有_path或title的文章
-    .map(post => ({
-      _path: post._path!, // 使用非空断言，因为已经过滤掉了undefined
-      title: post.title!, // 使用非空断言，因为已经过滤掉了undefined
-      description: post.description,
-      date: post.date,
-      readingTime: post.readingTime,
-      category: post.category,
-      tags: post.tags,
-      image: post.image
-    }))
-})
-
-// 技术栈数据
-const techStack = [
-  { name: 'Nuxt 4', icon: 'i-simple-icons-nuxtdotjs', color: 'text-green-500' },
-  { name: 'Vue 3', icon: 'i-simple-icons-vuedotjs', color: 'text-green-600' },
-  { name: 'TypeScript', icon: 'i-simple-icons-typescript', color: 'text-blue-600' },
-  { name: 'UnoCSS', icon: 'i-simple-icons-unocss', color: 'text-gray-600' },
-  { name: 'Nuxt UI', icon: 'i-heroicons-squares-2x2', color: 'text-primary-500' },
-  { name: 'ESLint', icon: 'i-simple-icons-eslint', color: 'text-purple-600' }
+<script setup>
+const products = [
+  {
+    name: 'Nuxt',
+    description: '直观的 Vue 框架，用于构建支持服务端渲染的现代 Web 应用程序。',
+    icon: '⚡',
+    stars: '78.0k',
+    link: 'https://nuxt.com',
+    color: 'text-green-500'
+  },
+  {
+    name: 'Tailwind CSS',
+    description: '一个实用优先的 CSS 框架，无需离开 HTML 即可快速构建自定义设计。',
+    icon: '🎨',
+    stars: '82.5k',
+    link: 'https://tailwindcss.com',
+    color: 'text-cyan-400'
+  },
+  {
+    name: 'TypeScript',
+    description: 'TypeScript 为 JavaScript 添加了静态类型检查，及早发现错误并改善开发体验。',
+    icon: '🔷',
+    stars: '103k',
+    link: 'https://typescriptlang.org',
+    color: 'text-blue-500'
+  },
+  {
+    name: 'Vue',
+    description: '用于构建用户界面的渐进式 JavaScript 框架，拥有易于上手的生态系统。',
+    icon: '💚',
+    stars: '208k',
+    link: 'https://vuejs.org',
+    color: 'text-emerald-500'
+  }
 ]
 
-// 格式化日期
-function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-</script>
+const { data: recentPosts } = await useAsyncData('recent-posts', () =>
+  queryCollection('content')
+    .order('date', 'DESC')
+    .limit(6)
+    .all()
+)
 
-<style scoped>
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>
+useHead({
+  title: '赛赛的前端视界 - 探索 Web 技术',
+  meta: [
+    { name: 'description', content: '基于 Nuxt 4、Vite 和 Tailwind CSS 构建的高性能博客模板。复刻 VoidZero 设计美学。' }
+  ]
+})
+</script>

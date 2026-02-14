@@ -1,5 +1,5 @@
 {
-  "name": "modern-blog",
+  "name": "my-blog",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,21 +8,40 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:oxc": "oxlint ."
   },
   "dependencies": {
-    "nuxt": "^4.0.1",
-    "vue": "^3.5.18",
-    "vue-router": "^4.5.1",
-    "@nuxt/ui": "^3.3.0",
-    "@nuxt/content": "^2.13.4",
-    "@nuxtjs/color-mode": "^3.5.2"
+    "better-sqlite3": "^12.6.2",
+    "nuxt": "^4.3.1",
+    "rss": "^1.2.2",
+    "tailwindcss": "^3.4.17",
+    "vue": "^3.5.28",
+    "vue-router": "^5.0.2"
   },
   "devDependencies": {
-    "@unocss/nuxt": "^0.63.6",
-    "@antfu/eslint-config": "^3.7.3",
-    "typescript": "^5.6.3",
-    "vue-tsc": "^2.1.10"
+    "@nuxt/content": "^3.11.2",
+    "@nuxt/image": "^2.0.0",
+    "@nuxt/test-utils": "^4.0.0",
+    "@nuxtjs/color-mode": "^4.0.0",
+    "@nuxtjs/google-fonts": "^3.2.0",
+    "@nuxtjs/seo": "^3.4.0",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@pinia/nuxt": "^0.11.3",
+    "@types/rss": "^0.0.32",
+    "@vue/test-utils": "^2.4.6",
+    "eslint-plugin-oxlint": "^1.43.0",
+    "happy-dom": "^20.6.0",
+    "mini-svg-data-uri": "^1.4.4",
+    "oxlint": "^1.45.0",
+    "pinia": "^3.0.4",
+    "vitest": "^4.0.18"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "better-sqlite3",
+      "esbuild",
+      "sharp"
+    ]
   }
 }

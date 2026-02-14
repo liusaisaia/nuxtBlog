@@ -1,78 +1,52 @@
 <template>
-  <section class="relative bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 overflow-hidden">
-    <!-- 背景装饰 -->
-    <div class="absolute inset-0">
-      <div class="absolute top-20 left-20 w-72 h-72 bg-green-100 dark:bg-green-900/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-      <div class="absolute top-40 right-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-      <div class="absolute -bottom-8 left-40 w-72 h-72 bg-purple-100 dark:bg-purple-900/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-    </div>
+  <div class="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-20">
+    <!-- Clean Background (Light Mode) -->
+    <div class="absolute inset-0 bg-white dark:bg-dark-bg transition-colors duration-300"></div>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-      <div class="text-center">
-        <!-- 徽章 -->
-        <div v-if="badge" class="inline-flex items-center px-4 py-2 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-sm font-medium mb-8">
-          <Icon :name="badge.icon || 'i-heroicons-sparkles'" class="w-4 h-4 mr-2" />
-          {{ badge.text }}
-        </div>
-
-        <!-- 标题 -->
-        <h1 class="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-          {{ title }}
-          <span v-if="highlight" class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-            {{ highlight }}
+    <div class="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 text-center flex flex-col items-center">
+      <!-- Badge -->
+      <div class="mb-12 animate-fade-in">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
-        </h1>
-
-        <!-- 描述 -->
-        <p v-if="description" class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-          {{ description }}
-        </p>
-
-        <!-- 按钮组 -->
-        <div v-if="buttons && buttons.length > 0" class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <UButton
-            v-for="(button, index) in buttons"
-            :key="index"
-            :to="button.to"
-            :size="button.size || 'lg'"
-            :icon="button.icon"
-            :color="button.color || 'primary'"
-            :variant="button.variant || 'solid'"
-            :class="button.class || ''"
-            @click="button.click"
-          >
-            {{ button.label }}
-          </UButton>
+          <span class="text-[13px] font-mono text-gray-500 dark:text-gray-400">持续构建中 / building</span>
         </div>
       </div>
+
+      <!-- Main Title -->
+      <h1 class="text-6xl sm:text-7xl lg:text-[80px] leading-[1.1] font-bold tracking-tight mb-8 text-gray-900 dark:text-white animate-slide-up">
+        赛赛的
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#4f46e5] to-[#9333ea]">前端视界</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 leading-relaxed max-w-xl mx-auto animate-slide-up [animation-delay:200ms]">
+        探索 Web 技术无限可能，分享开发经验与心得。
+      </p>
+
+      <!-- Hero CTA Button -->
+      <div class="animate-slide-up [animation-delay:400ms]">
+        <NuxtLink
+          to="/posts"
+          class="group relative inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0A0A0A] text-white overflow-hidden transition-all hover:scale-105"
+        >
+          <!-- Gradient Border Glow -->
+          <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-[1px] opacity-100 mask-image-linear-gradient">
+            <span class="absolute inset-0 bg-[#0A0A0A] rounded-[11px]"></span>
+          </span>
+          
+          <!-- Button Content -->
+          <span class="relative flex items-center gap-2 z-10">
+            <!-- Icon -->
+            <span class="text-blue-400">⚡</span>
+            <span class="font-medium">开始阅读</span>
+          </span>
+          
+          <!-- Outer Glow -->
+          <span class="absolute inset-0 -z-10 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></span>
+        </NuxtLink>
+      </div>
     </div>
-  </section>
+  </div>
 </template>
-
-<script setup lang="ts">
-interface Badge {
-  text: string
-  icon?: string
-}
-
-interface Button {
-  label: string
-  to?: string
-  icon?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  color?: "primary" | "secondary" | "info" | "success" | "warning" | "error" | "neutral" | undefined
-  variant?: 'solid' | 'outline' | 'ghost' | 'link'
-  class?: string
-  click?: () => void
-}
-
-interface Props {
-  title: string
-  highlight?: string
-  description?: string
-  badge?: Badge
-  buttons?: Button[]
-}
-
-defineProps<Props>()
-</script>
