@@ -12,30 +12,37 @@ export default <Partial<Config>>{
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
-        // VoidZero Style Palette
-        dark: {
-          bg: '#0A0A0A', // Deep black
-          surface: '#121212', // Slightly lighter
-          border: 'rgba(255, 255, 255, 0.08)',
-          'border-hover': 'rgba(255, 255, 255, 0.15)',
+        // Figma Design System - Dark Purple Theme (default)
+        background: {
+          primary: '#15121A',
+          secondary: '#100D15',
         },
-        primary: {
-          DEFAULT: '#646cff', // Vite Blue-ish
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-        }
+        border: {
+          DEFAULT: 'rgba(73, 68, 85, 0.15)',
+          hover: 'rgba(73, 68, 85, 0.3)',
+        },
+        accent: {
+          purple: '#6F45E3',
+          'purple-light': 'rgba(111, 69, 227, 0.1)',
+        },
+        text: {
+          primary: '#FFFFFF',
+          secondary: 'rgba(255, 255, 255, 0.6)',
+          muted: 'rgba(255, 255, 255, 0.4)',
+        },
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg)',
+        'accent-gradient': 'linear-gradient(177deg, rgba(111, 69, 227, 1) 0%, rgba(44, 40, 49, 1) 100%)',
+        'hero-decoration': 'linear-gradient(237deg, rgba(205, 189, 255, 0.05) 0%, rgba(205, 189, 255, 0) 100%)',
+      },
+      boxShadow: {
+        'header': '0px 20px 40px 0px rgba(8, 6, 13, 0.4)',
+        'card': '0 4px 20px rgba(0, 0, 0, 0.3)',
+      },
+      backdropBlur: {
+        'header': '24px',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out',
@@ -56,6 +63,9 @@ export default <Partial<Config>>{
           '0%': { opacity: '0', transform: 'translate(-72%, -62%) scale(0.5)' },
           '100%': { opacity: '1', transform: 'translate(-50%,-40%) scale(1)' },
         },
+      },
+      maxWidth: {
+        'page': '1280px',
       },
     },
   },

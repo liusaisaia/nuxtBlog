@@ -39,6 +39,28 @@ export default defineNuxtConfig({
   colorMode: {
     classSuffix: '',
     preference: 'system', // 默认跟随系统
-    fallback: 'dark'      // 回退到深色模式
+    fallback: 'dark',     // 回退到深色模式
+    dataValue: 'theme'    // 使用 data-theme 属性
+  },
+
+  // Nitro 配置 - 用于 Vercel 部署
+  nitro: {
+    preset: 'vercel',
+    compressPublicAssets: true,
+  },
+
+  // 运行时配置
+  runtimeConfig: {
+    // 服务端私有配置
+    jwtSecret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+    // 公开配置
+    public: {
+      siteUrl: process.env.SITE_URL || 'http://localhost:3000',
+    }
+  },
+
+  // 图片优化配置
+  image: {
+    remoteDomains: ['api.dicebear.com'],
   }
 })
