@@ -47,6 +47,10 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'vercel',
     compressPublicAssets: true,
+    rollupConfig: {
+      external: [],
+    },
+    nodeCompat: true,
   },
 
   // 运行时配置
