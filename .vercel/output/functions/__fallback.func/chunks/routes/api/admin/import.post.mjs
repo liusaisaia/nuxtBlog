@@ -13,9 +13,9 @@ import 'node:crypto';
 import 'better-sqlite3';
 import 'node:url';
 import 'ipx';
-import 'drizzle-orm/better-sqlite3';
+import 'drizzle-orm/libsql';
+import '@libsql/client';
 import 'drizzle-orm/sqlite-core';
-import 'path';
 
 const import_post = defineEventHandler(async (event) => {
   const token = getCookie(event, "auth_token");

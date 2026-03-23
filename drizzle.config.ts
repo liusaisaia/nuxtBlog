@@ -5,6 +5,6 @@ export default defineConfig({
   schema: './server/database/schema.ts',
   out: './drizzle',
   dbCredentials: {
-    url: 'data/blog.db',
+    url: process.env.TURSO_DATABASE_URL || 'file:./data/blog.db',
   },
 })

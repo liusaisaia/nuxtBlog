@@ -11,10 +11,10 @@ import 'node:crypto';
 import 'better-sqlite3';
 import 'node:url';
 import 'ipx';
-import 'drizzle-orm/better-sqlite3';
+import 'drizzle-orm/libsql';
+import '@libsql/client';
 import 'drizzle-orm/sqlite-core';
 import 'drizzle-orm';
-import 'path';
 
 const index_post = defineEventHandler(async (event) => {
   const body = await readBody(event);

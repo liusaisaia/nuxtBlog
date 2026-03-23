@@ -5,12 +5,6 @@
   "installCommand": "npm install",
   "framework": "nuxtjs",
   "regions": ["hkg1"],
-  "functions": {
-    "server/**/*": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",

@@ -1,8 +1,7 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
 import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
-import path from 'path';
 
 const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -130,8 +129,24 @@ const schema = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   users: users
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const sqlite = new Database(path.resolve("data/blog.db"));
-const db = drizzle(sqlite, { schema });
+const isVercel = process.env.VERCEL === "1";
+function createDbClient() {
+  if (isVercel) {
+    if (!process.env.TURSO_DATABASE_URL) {
+      throw new Error("TURSO_DATABASE_URL is required in production environment");
+    }
+    return createClient({
+      url: process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN
+    });
+  } else {
+    return createClient({
+      url: "file:./data/blog.db"
+    });
+  }
+}
+const client = createDbClient();
+const db = drizzle(client, { schema });
 
 export { postTags as a, categories as c, db as d, posts as p, settings as s, tags as t, users as u };
 //# sourceMappingURL=index.mjs.map
