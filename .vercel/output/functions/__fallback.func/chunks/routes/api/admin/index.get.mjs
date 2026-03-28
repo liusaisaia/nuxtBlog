@@ -16,7 +16,7 @@ import 'drizzle-orm/libsql';
 import '@libsql/client';
 import 'drizzle-orm/sqlite-core';
 
-const index_get = defineEventHandler(async (event) => {
+const index_get = defineEventHandler(async () => {
   const list = await db.select().from(categories).orderBy(desc(categories.createdAt));
   return { list };
 });

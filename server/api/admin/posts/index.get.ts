@@ -1,7 +1,6 @@
 import { db } from '~/server/database'
-import { posts, categories, tags, postTags } from '~/server/database/schema'
+import { posts, categories } from '~/server/database/schema'
 import { eq, desc, like, and, or, count } from 'drizzle-orm'
-import { verifyToken } from '~/server/utils/auth'
 
 // 获取文章列表
 export default defineEventHandler(async (event) => {
@@ -38,7 +37,7 @@ export default defineEventHandler(async (event) => {
       slug: posts.slug,
       excerpt: posts.excerpt,
       status: posts.status,
-      featured: posts.featured,
+      featured: posts.isFeatured,
       viewCount: posts.viewCount,
       publishedAt: posts.publishedAt,
       createdAt: posts.createdAt,

@@ -6,9 +6,9 @@ const siteDescription = ref('')
 const saving = ref(false)
 
 onMounted(() => {
-  if (settings.value) {
-    siteName.value = settings.value.siteName || ''
-    siteDescription.value = settings.value.siteDescription || ''
+  if (settings.value?.settings) {
+    siteName.value = settings.value.settings.siteName || ''
+    siteDescription.value = settings.value.settings.siteDescription || ''
   }
 })
 

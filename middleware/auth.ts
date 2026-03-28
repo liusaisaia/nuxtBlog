@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware(async (to) => {
+export default defineNuxtRouteMiddleware(async () => {
   const tokenCookie = useCookie('auth_token')
   const token = tokenCookie.value
   
@@ -15,7 +15,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       tokenCookie.value = null
       return navigateTo('/admin/login')
     }
-  } catch (e) {
+  } catch {
     tokenCookie.value = null
     return navigateTo('/admin/login')
   }

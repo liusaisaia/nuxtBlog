@@ -17,14 +17,14 @@ import '@libsql/client';
 import 'drizzle-orm/sqlite-core';
 
 const _id__put = defineEventHandler(async (event) => {
-  var _a;
+  var _a, _b, _c, _d;
   const id = parseInt((_a = event.context.params) == null ? void 0 : _a.id);
   const body = await readBody(event);
   const token = getCookie(event, "auth_token");
   if (!token) {
     throw createError({ statusCode: 401, message: "\u672A\u767B\u5F55" });
   }
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   if (!payload) {
     throw createError({ statusCode: 401, message: "\u767B\u5F55\u5DF2\u8FC7\u671F" });
   }
@@ -41,10 +41,9 @@ const _id__put = defineEventHandler(async (event) => {
     excerpt: body.excerpt,
     coverImage: body.coverImage,
     status: body.status,
-    featured: body.featured,
+    isFeatured: (_c = (_b = body.isFeatured) != null ? _b : body.featured) != null ? _c : false,
+    isSticky: (_d = body.isSticky) != null ? _d : false,
     categoryId: body.categoryId,
-    seoTitle: body.seoTitle,
-    seoDescription: body.seoDescription,
     updatedAt: /* @__PURE__ */ new Date()
   };
   if (body.status === "published" && !existing.publishedAt) {

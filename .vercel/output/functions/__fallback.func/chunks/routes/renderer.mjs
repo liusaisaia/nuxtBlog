@@ -3,18 +3,8 @@ import { h as buildAssetsURL, u as useRuntimeConfig, i as getResponseStatusText,
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
-import { isRef, toValue } from 'vue';
-import 'jose';
-import 'node:http';
-import 'node:https';
-import 'node:events';
-import 'node:buffer';
-import 'node:fs';
-import 'node:path';
-import 'node:crypto';
-import 'better-sqlite3';
-import 'node:url';
-import 'ipx';
+import { walkResolver } from 'unhead/utils';
+import { isRef, toValue, hasInjectionContext, inject, ref, watchEffect, getCurrentInstance, onBeforeUnmount, onDeactivated, onActivated } from 'vue';
 
 const VueResolver = (_, value) => {
   return isRef(value) ? toValue(value) : value;
@@ -34,6 +24,46 @@ function vueInstall(head) {
 }
 
 // @__NO_SIDE_EFFECTS__
+function injectHead() {
+  if (hasInjectionContext()) {
+    const instance = inject(headSymbol);
+    if (instance) {
+      return instance;
+    }
+  }
+  throw new Error("useHead() was called without provide context, ensure you call it through the setup() function.");
+}
+function useHead(input, options = {}) {
+  const head = options.head || /* @__PURE__ */ injectHead();
+  return head.ssr ? head.push(input || {}, options) : clientUseHead(head, input, options);
+}
+function clientUseHead(head, input, options = {}) {
+  const deactivated = ref(false);
+  let entry;
+  watchEffect(() => {
+    const i = deactivated.value ? {} : walkResolver(input, VueResolver);
+    if (entry) {
+      entry.patch(i);
+    } else {
+      entry = head.push(i, options);
+    }
+  });
+  const vm = getCurrentInstance();
+  if (vm) {
+    onBeforeUnmount(() => {
+      entry.dispose();
+    });
+    onDeactivated(() => {
+      deactivated.value = true;
+    });
+    onActivated(() => {
+      deactivated.value = false;
+    });
+  }
+  return entry;
+}
+
+// @__NO_SIDE_EFFECTS__
 function createHead(options = {}) {
   const head = createHead$1({
     ...options,
@@ -45,7 +75,7 @@ function createHead(options = {}) {
 
 const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"key":"gf-prefetch","rel":"dns-prefetch","href":"https://fonts.gstatic.com/"},{"key":"gf-preconnect","rel":"preconnect","href":"https://fonts.gstatic.com/","crossorigin":"anonymous"},{"key":"gf-origin-preconnect","rel":"preconnect","href":"https://fonts.googleapis.com/"}],"style":[],"script":[{"key":"gf-script","children":"(function(){\n        var h=document.querySelector(\"head\");\n        var m=h.querySelector('meta[name=\"head:count\"]');\n        if(m){m.setAttribute('content',Number(m.getAttribute('content'))+1);}\n        else{m=document.createElement('meta');m.setAttribute('name','head:count');m.setAttribute('content','1');h.append(m);}\n        var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap';h.appendChild(l);\n      })();"}],"noscript":[{"children":"<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap\">","tagPosition":"bodyOpen"}]};
 
 const appRootTag = "div";
 
@@ -442,5 +472,10 @@ function renderHTMLDocument(html) {
 	return "<!DOCTYPE html>" + `<html${joinAttrs(html.htmlAttrs)}>` + `<head>${joinTags(html.head)}</head>` + `<body${joinAttrs(html.bodyAttrs)}>${joinTags(html.bodyPrepend)}${joinTags(html.body)}${joinTags(html.bodyAppend)}</body>` + "</html>";
 }
 
-export { renderer as default };
+const renderer$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: renderer
+}, Symbol.toStringTag, { value: 'Module' }));
+
+export { headSymbol as h, renderer$1 as r, useHead as u };
 //# sourceMappingURL=renderer.mjs.map

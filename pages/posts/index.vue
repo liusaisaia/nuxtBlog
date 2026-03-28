@@ -1,307 +1,131 @@
 <template>
-  <div class="pt-24 min-h-screen">
-    <div class="max-w-page mx-auto px-8 pb-20">
-      <div class="flex gap-12">
-        <!-- 左侧边栏 - 目录 -->
-        <aside class="w-56 flex-shrink-0 hidden lg:block">
-          <div class="sticky top-24">
-            <h3 class="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
-              目录
-            </h3>
-            <nav class="space-y-1">
-              <a
-                v-for="item in tocItems"
-                :key="item.id"
-                :href="`#${item.id}`"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all group"
-                :class="activeSection === item.id ? 'text-accent-purple bg-accent-purple/10' : 'text-text-secondary hover:text-white'"
-              >
-                <span
-                  class="w-1.5 h-1.5 rounded-full transition-colors"
-                  :class="activeSection === item.id ? 'bg-accent-purple' : 'bg-text-muted group-hover:bg-text-secondary'"
-                />
-                <span>{{ item.text }}</span>
-              </a>
-            </nav>
-          </div>
-        </aside>
+  <div class="container-page pb-20">
+    <section class="pt-8 md:pt-14">
+      <div class="surface-strong rounded-3xl p-6 md:p-8 motion-rise">
+        <p class="text-xs uppercase tracking-[0.2em] text-mute">Article Archive</p>
+        <h1 class="text-3xl md:text-5xl font-semibold tracking-tight mt-3">技术文章归档</h1>
+        <p class="text-soft mt-4 max-w-2xl">围绕前端工程、系统设计、开发工具与性能优化，快速找到你要读的那篇文章。</p>
 
-        <!-- 主内容区 -->
-        <div class="flex-1 min-w-0">
-          <!-- 页面标题 -->
-          <div class="mb-10">
-            <h1 class="text-5xl font-bold text-white mb-3">
-              文章归档<span class="text-accent-purple">.</span>
-            </h1>
-            <p class="text-text-secondary max-w-xl">
-              精心策划的工程见解、架构模式和现代技术栈深度解析的精选索引。
-            </p>
-          </div>
-
-          <!-- 搜索和筛选 -->
-          <div class="flex flex-col sm:flex-row gap-4 mb-10">
-            <div class="relative flex-1">
-              <svg
-                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="搜索文章、标签或主题..."
-                class="w-full pl-11 pr-4 py-2.5 rounded-lg bg-[#1a1625] border border-[#2a2435] text-white placeholder:text-text-muted focus:outline-none focus:border-[#4a4060] transition-colors text-sm"
-              >
-            </div>
-            <div class="flex gap-2">
-              <button
-                v-for="filter in filters"
-                :key="filter.id"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition-all border"
-                :class="activeFilter === filter.id
-                  ? 'bg-accent-purple/20 text-accent-purple border-accent-purple/30'
-                  : 'bg-[#1a1625] text-text-secondary border-[#2a2435] hover:border-[#4a4060]'"
-                @click="activeFilter = filter.id"
-              >
-                {{ filter.text }}
-              </button>
-            </div>
-          </div>
-
-          <!-- 分类卡片网格 -->
-          <div id="categories" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
-            <div
-              v-for="category in categories"
-              :key="category.name"
-              class="group p-6 rounded-xl bg-[#1a1625] border border-[#2a2435] hover:border-[#4a4060] transition-all cursor-pointer"
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 mt-6">
+          <label class="lg:col-span-6 surface rounded-xl px-4 py-3 flex items-center gap-3">
+            <svg class="w-4 h-4 text-mute" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-4.35-4.35M16 10.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
+            </svg>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="w-full bg-transparent outline-none text-sm"
+              placeholder="搜索标题、摘要或标签"
             >
-              <div class="flex items-start justify-between mb-4">
-                <span class="text-xs text-text-muted uppercase tracking-wider">{{ category.tag }}</span>
-                <svg
-                  class="w-5 h-5 text-text-muted group-hover:text-accent-purple transition-colors"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="category.icon" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold text-white mb-2 group-hover:text-accent-purple transition-colors">
-                {{ category.name }}
-              </h3>
-              <p class="text-text-secondary text-sm mb-4 line-clamp-2">
-                {{ category.description }}
-              </p>
-              <div class="flex items-center gap-1 text-sm text-accent-purple">
-                <span>探索</span>
-                <svg
-                  class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          </label>
 
-          <!-- 文章时间线 -->
-          <div id="timeline" class="space-y-12">
-            <div v-for="(posts, year) in groupedPosts" :key="year">
-              <!-- 年份标题 -->
-              <h2 class="text-3xl font-bold text-white mb-6">{{ year }}</h2>
+          <label class="lg:col-span-3 relative">
+            <select v-model="activeTag" class="themed-select w-full surface rounded-xl px-4 py-3 pr-10 text-sm outline-none">
+              <option value="all">全部标签</option>
+              <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
+            </select>
+            <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mute" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9l6 6 6-6" />
+            </svg>
+          </label>
 
-              <!-- 文章列表 -->
-              <div class="space-y-4">
-                <NuxtLink
-                  v-for="post in posts"
-                  :key="post.path"
-                  :to="post.path"
-                  class="group flex gap-6 p-4 rounded-xl hover:bg-[#1a1625]/50 transition-colors"
-                >
-                  <!-- 日期 -->
-                  <div class="w-16 flex-shrink-0 text-right">
-                    <span class="text-xs text-text-muted uppercase">{{ formatMonth(post.date) }}</span>
-                    <div class="text-lg font-bold text-white">{{ formatDay(post.date) }}</div>
-                  </div>
-
-                  <!-- 内容 -->
-                  <div class="flex-1 min-w-0 border-l border-[#2a2435] pl-6">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span
-                        v-for="tag in post.tags?.slice(0, 2)"
-                        :key="tag"
-                        class="px-2 py-0.5 text-xs rounded bg-accent-purple/10 text-accent-purple"
-                      >
-                        {{ tag }}
-                      </span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-accent-purple transition-colors">
-                      {{ post.title }}
-                    </h3>
-                    <p class="text-text-secondary text-sm line-clamp-2">
-                      {{ post.description }}
-                    </p>
-                  </div>
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
-
-          <!-- 订阅区域 -->
-          <div id="subscribe" class="mt-16 p-8 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] relative overflow-hidden">
-            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div>
-                <h3 class="text-2xl font-bold text-white mb-2">
-                  加入虚空<span class="text-white/80">.</span>
-                </h3>
-                <p class="text-white/70 text-sm max-w-md">
-                  每周获取技术深度解析，直接送达你的收件箱。
-                </p>
-              </div>
-              <div class="flex gap-3 w-full md:w-auto">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  class="flex-1 md:w-64 px-4 py-3 rounded-lg bg-[#1a1625] border border-[#2a2435] text-white placeholder:text-text-muted focus:outline-none focus:border-accent-purple/50 text-sm"
-                >
-                <button class="px-6 py-3 rounded-lg bg-accent-purple text-white font-semibold hover:bg-accent-purple/80 transition-all text-sm whitespace-nowrap">
-                  订阅
-                </button>
-              </div>
-            </div>
-          </div>
+          <label class="lg:col-span-3 relative">
+            <select v-model="sortBy" class="themed-select w-full surface rounded-xl px-4 py-3 pr-10 text-sm outline-none">
+              <option value="latest">最新优先</option>
+              <option value="oldest">最早优先</option>
+              <option value="title">标题排序</option>
+            </select>
+            <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mute" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9l6 6 6-6" />
+            </svg>
+          </label>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="mt-8">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm text-mute">共 {{ filteredPosts.length }} 篇文章</p>
+        <div class="hidden md:flex flex-wrap gap-2 justify-end">
+          <button
+            v-for="tag in allTags.slice(0, 8)"
+            :key="tag"
+            class="px-2.5 py-1 rounded-full text-xs border transition-colors"
+            :class="activeTag === tag ? 'brand-chip border-transparent' : 'border-soft text-soft hover:border-strong'"
+            @click="activeTag = activeTag === tag ? 'all' : tag"
+          >
+            {{ tag }}
+          </button>
+        </div>
+      </div>
+
+      <div v-if="filteredPosts.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+        <PostCard v-for="post in filteredPosts" :key="post.path" :post="post" />
+      </div>
+
+      <div v-else class="surface rounded-2xl p-8 text-center">
+        <h2 class="text-lg font-medium">没有匹配结果</h2>
+        <p class="text-soft mt-2 text-sm">换个关键词或切换标签试试。</p>
+      </div>
+    </section>
   </div>
 </template>
 
-<script setup>
-// 目录项
-const tocItems = [
-  { id: 'categories', text: '技术分类' },
-  { id: 'timeline', text: '文章时间线' },
-  { id: 'subscribe', text: '订阅更新' },
-]
-
-// 当前活跃的目录项
-const activeSection = ref('categories')
-
-// 筛选器
-const filters = [
-  { id: 'all', text: '全部' },
-  { id: 'tutorial', text: '教程' },
-  { id: 'architecture', text: '架构' },
-]
-const activeFilter = ref('all')
+<script setup lang="ts">
 const searchQuery = ref('')
+const activeTag = ref('all')
+const sortBy = ref('latest')
 
-// 分类数据
-const categories = [
-  {
-    name: '前端',
-    tag: '开发',
-    description: '深入 React、Vue 和不断演进的 UI 工程生态系统。',
-    icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-  },
-  {
-    name: '后端',
-    tag: '架构',
-    description: '可扩展系统、数据库优化和高性能 API。',
-    icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
-  },
-  {
-    name: 'DevOps',
-    tag: '自动化',
-    description: 'CI/CD 流水线、容器化和云原生基础设施。',
-    icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-  },
-]
-
-// 获取文章数据
-const { data: allPosts } = await useAsyncData('all-posts', () =>
+const { data: posts } = await useAsyncData('posts-archive', () =>
   queryCollection('content')
     .order('date', 'DESC')
-    .select('title', 'description', 'date', 'tags', 'path')
+    .select('title', 'description', 'date', 'tags', 'path', 'readingTime')
     .all(),
 )
 
-// 筛选后的文章
-const filteredPosts = computed(() => {
-  if (!allPosts.value) return []
-  let posts = allPosts.value
+const allTags = computed(() => {
+  const set = new Set<string>()
+  for (const post of posts.value || []) {
+    for (const tag of post.tags || []) {
+      set.add(tag)
+    }
+  }
+  return [...set]
+})
 
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    posts = posts.filter(post =>
-      post.title.toLowerCase().includes(query)
-      || post.description?.toLowerCase().includes(query),
-    )
+const filteredPosts = computed(() => {
+  const keyword = searchQuery.value.trim().toLowerCase()
+
+  let list = [...(posts.value || [])]
+
+  if (activeTag.value !== 'all') {
+    list = list.filter(post => (post.tags || []).includes(activeTag.value))
   }
 
-  return posts
-})
+  if (keyword) {
+    list = list.filter((post) => {
+      const title = post.title?.toLowerCase() || ''
+      const desc = post.description?.toLowerCase() || ''
+      const tags = (post.tags || []).join(' ').toLowerCase()
+      return title.includes(keyword) || desc.includes(keyword) || tags.includes(keyword)
+    })
+  }
 
-// 按年份分组
-const groupedPosts = computed(() => {
-  const groups = {}
-  filteredPosts.value.forEach((post) => {
-    const year = new Date(post.date).getFullYear()
-    if (!groups[year]) {
-      groups[year] = []
-    }
-    groups[year].push(post)
-  })
-  return groups
-})
+  if (sortBy.value === 'title') {
+    list.sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'))
+  } else if (sortBy.value === 'oldest') {
+    list.sort((a, b) => Number(new Date(a.date)) - Number(new Date(b.date)))
+  } else {
+    list.sort((a, b) => Number(new Date(b.date)) - Number(new Date(a.date)))
+  }
 
-// 格式化日期
-function formatMonth(date) {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('zh-CN', {
-    month: 'short',
-    timeZone: 'UTC',
-  })
-}
-
-function formatDay(date) {
-  if (!date) return ''
-  return new Date(date).getDate()
-}
-
-// 监听滚动更新目录
-onMounted(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          activeSection.value = entry.target.id
-        }
-      })
-    },
-    { threshold: 0.5 },
-  )
-
-  tocItems.forEach((item) => {
-    const element = document.getElementById(item.id)
-    if (element) observer.observe(element)
-  })
+  return list
 })
 
 useHead({
-  title: '文章归档 - VOIDZERO',
+  title: '文章归档 - Void Notes',
   meta: [
-    { name: 'description', content: '精心策划的工程见解、架构模式和现代技术栈深度解析。' },
+    { name: 'description', content: '按主题、关键词和时间快速检索技术文章。' },
   ],
 })
 </script>

@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: '未登录' })
   }
   
-  const payload = verifyToken(token)
+  const payload = await verifyToken(token)
   if (!payload) {
     throw createError({ statusCode: 401, message: '登录已过期' })
   }

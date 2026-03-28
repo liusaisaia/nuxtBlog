@@ -1,115 +1,138 @@
 <template>
-  <header class="fixed top-0 left-0 right-0 z-50 w-full bg-[rgba(21,18,26,0.7)] backdrop-blur-[24px] shadow-header">
-    <div class="max-w-page mx-auto px-8 h-16 flex items-center justify-between">
-      <!-- Logo -->
-      <NuxtLink to="/" class="flex items-center gap-2 group">
-        <span class="font-bold text-xl tracking-tight text-white">VOIDZERO</span>
-      </NuxtLink>
-
-      <!-- Navigation -->
-      <nav class="flex items-center gap-8">
-        <NuxtLink 
-          to="/" 
-          class="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-          :class="{ 'text-text-primary': route.path === '/' }"
-        >
-          首页
+  <header
+    class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
+    :class="scrolled ? 'py-2' : 'py-3'"
+  >
+      <div
+        class="layout-shell rounded-2xl"
+        :class="scrolled ? 'surface-strong' : 'bg-transparent border border-transparent'"
+      >
+      <div class="h-14 flex items-center justify-between px-6 md:px-10">
+        <NuxtLink to="/" class="flex items-center gap-3">
+          <span class="h-7 w-7 rounded-md brand-chip flex items-center justify-center text-xs font-black">V</span>
+          <span class="font-semibold tracking-tight text-base md:text-lg">Void Notes</span>
         </NuxtLink>
 
-        <NuxtLink 
-          to="/posts" 
-          class="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-          :class="{ 'text-text-primary': route.path === '/posts' }"
-        >
-          文章
-        </NuxtLink>
-
-        <NuxtLink 
-          to="/tags" 
-          class="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-          :class="{ 'text-text-primary': route.path === '/tags' }"
-        >
-          标签
-        </NuxtLink>
-        
-        <NuxtLink 
-          to="/about" 
-          class="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-          :class="{ 'text-text-primary': route.path === '/about' }"
-        >
-          关于
-        </NuxtLink>
-      </nav>
-
-      <!-- Right Side -->
-      <div class="flex items-center gap-4">
-        <!-- Theme Toggle -->
-        <button
-          class="w-9 h-9 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-purple hover:bg-accent-purple/10 transition-all"
-          @click="toggleTheme"
-        >
-          <!-- Sun Icon (Light Mode) -->
-          <svg
-            v-if="isDark"
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <nav class="hidden md:flex items-center gap-1">
+          <NuxtLink
+            v-for="item in nav"
+            :key="item.to"
+            :to="item.to"
+            class="px-3 py-2 text-sm rounded-lg transition-colors whitespace-nowrap leading-none"
+            :class="route.path === item.to ? 'brand-chip font-medium' : 'text-soft hover:text-[var(--text)] hover:bg-[var(--brand-soft)]'"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-            />
-          </svg>
-          <!-- Moon Icon (Dark Mode) -->
-          <svg
-            v-else
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            {{ item.label }}
+          </NuxtLink>
+        </nav>
+
+        <div class="flex items-center gap-2 md:gap-3">
+          <button
+            class="theme-toggle w-9 h-9 rounded-lg border border-soft text-soft hover:text-[var(--text)] hover:bg-[var(--brand-soft)] transition-colors inline-flex items-center justify-center"
+            @click="toggleTheme"
+            aria-label="切换主题"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-            />
-          </svg>
-        </button>
+            <span class="relative block h-4 w-4 shrink-0">
+              <Sun
+                class="absolute inset-0 h-4 w-4 transition-opacity duration-200"
+                :class="isDark ? 'opacity-100' : 'opacity-0'"
+                :stroke-width="1.9"
+                aria-hidden="true"
+              />
+              <Moon
+                class="absolute inset-0 h-4 w-4 transition-opacity duration-200"
+                :class="isDark ? 'opacity-0' : 'opacity-100'"
+                :stroke-width="1.9"
+                aria-hidden="true"
+              />
+            </span>
+          </button>
 
-        <a
-          href="https://github.com/saisaia"
-          target="_blank"
-          class="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-          </svg>
-          <span class="text-sm font-semibold">saisaia</span>
-        </a>
+          <a
+            href="https://github.com/saisaia"
+            target="_blank"
+            rel="noreferrer"
+            class="hidden sm:inline-flex h-9 items-center gap-2 px-3 rounded-lg border border-soft text-sm leading-none text-soft hover:text-[var(--text)] hover:border-strong transition-colors whitespace-nowrap"
+          >
+            <Github class="w-4 h-4 shrink-0" :stroke-width="2" aria-hidden="true" />
+            <span class="leading-none">GitHub</span>
+          </a>
 
-        <a
-          href="#"
-          class="px-4 py-1.5 text-sm font-medium text-white bg-[#2a2435] border border-[#2a2435] rounded-lg hover:bg-accent-purple hover:border-accent-purple transition-all"
-        >
-          探索 Vite+
-        </a>
+          <button
+            class="md:hidden w-9 h-9 rounded-lg border border-soft text-soft"
+            @click="mobileOpen = !mobileOpen"
+            aria-label="打开菜单"
+          >
+            <Menu class="w-4 h-4 mx-auto" :stroke-width="2" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
+      <div v-if="mobileOpen" class="md:hidden px-3 pb-3 motion-fade">
+        <nav class="surface rounded-xl p-2 flex flex-col gap-1">
+          <NuxtLink
+            v-for="item in nav"
+            :key="item.to"
+            :to="item.to"
+            class="px-3 py-2 rounded-lg text-sm"
+            :class="route.path === item.to ? 'brand-chip font-medium' : 'text-soft'"
+            @click="mobileOpen = false"
+          >
+            {{ item.label }}
+          </NuxtLink>
+        </nav>
       </div>
     </div>
   </header>
 </template>
 
-<script setup>
-const route = useRoute()
+<script setup lang="ts">
+import { Github, Menu, Moon, Sun } from 'lucide-vue-next'
 
-// 主题切换 - 使用 color-mode 模块
+const route = useRoute()
 const colorMode = useColorMode()
+const mobileOpen = ref(false)
+const scrolled = ref(false)
+
+const nav = [
+  { label: '首页', to: '/' },
+  { label: '文章', to: '/posts' },
+  { label: '标签', to: '/tags' },
+  { label: '关于', to: '/about' },
+]
+
 const isDark = computed(() => colorMode.value === 'dark')
 
 function toggleTheme() {
-  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+  colorMode.preference = isDark.value ? 'light' : 'dark'
 }
+
+onMounted(() => {
+  updateScrollState()
+  window.addEventListener('scroll', updateScrollState, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updateScrollState)
+})
+
+function updateScrollState() {
+  scrolled.value = window.scrollY > 10
+}
+
+watch(
+  () => route.path,
+  () => {
+    mobileOpen.value = false
+  },
+)
 </script>
+
+<style scoped>
+.theme-toggle svg {
+  color: var(--text-soft);
+}
+
+.theme-toggle:hover svg {
+  color: var(--text);
+}
+</style>

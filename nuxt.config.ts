@@ -21,25 +21,18 @@ export default defineNuxtConfig({
 
   // Google Fonts 配置
   googleFonts: {
+    download: false,
     families: {
-      Inter: [400, 500, 600, 700],
-      'JetBrains+Mono': [400, 500, 600]
-    }
-  },
-
-  // Content 模块配置
-  content: {
-    // documentDriven: true, // Content v3 中已弃用此选项
-    highlight: {
-      theme: 'github-dark'
+      'Space+Grotesk': [400, 500, 600, 700],
+      'IBM+Plex+Mono': [400, 500, 600]
     }
   },
 
   // 颜色模式配置
   colorMode: {
     classSuffix: '',
-    preference: 'system', // 默认跟随系统
-    fallback: 'dark',     // 回退到深色模式
+    preference: 'light', // 默认使用浅色
+    fallback: 'light',   // 无法检测时回退浅色
     dataValue: 'theme'    // 使用 data-theme 属性
   },
 
@@ -50,7 +43,6 @@ export default defineNuxtConfig({
     rollupConfig: {
       external: [],
     },
-    nodeCompat: true,
   },
 
   // 运行时配置
@@ -65,6 +57,6 @@ export default defineNuxtConfig({
 
   // 图片优化配置
   image: {
-    remoteDomains: ['api.dicebear.com'],
+    domains: ['api.dicebear.com'],
   }
 })

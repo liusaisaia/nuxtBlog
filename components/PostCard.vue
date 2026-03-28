@@ -1,65 +1,58 @@
 <template>
   <NuxtLink
     :to="post.path"
-    class="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-border-hover transition-all duration-300 flex flex-col h-full"
+    class="surface rounded-2xl p-5 md:p-6 h-full group transition-all duration-300 hover:-translate-y-1 hover:border-strong"
   >
-    <!-- Tags -->
-    <span class="flex items-center gap-2 mb-4">
-      <span
-        v-for="tag in post.tags?.slice(0, 2)"
-        :key="tag"
-        class="px-2 py-1 text-xs rounded-full bg-accent-purple text-white"
-      >
-        {{ tag }}
-      </span>
-    </span>
+    <div class="flex items-center justify-between gap-3 mb-4 text-xs">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span
+          v-for="tag in post.tags?.slice(0, 2)"
+          :key="tag"
+          class="brand-chip rounded-full px-2.5 py-1"
+        >
+          {{ tag }}
+        </span>
+      </div>
+      <span class="text-mute whitespace-nowrap">{{ readingLabel }}</span>
+    </div>
 
-    <!-- Title -->
-    <h3 class="text-lg font-semibold text-white mb-2 group-hover:text-accent-purple transition-colors line-clamp-2">
+    <h3 class="text-xl font-semibold tracking-tight mb-2 leading-snug group-hover:text-[var(--brand)] transition-colors">
       {{ post.title }}
     </h3>
 
-    <!-- Description -->
-    <p class="text-sm text-text-secondary mb-4 line-clamp-2 flex-grow">
-      {{ post.description }}
+    <p class="text-soft text-sm leading-relaxed mb-6 line-clamp-3">
+      {{ post.description || '这篇文章没有摘要，请点击进入阅读全文。' }}
     </p>
 
-    <!-- Footer -->
-    <span class="flex items-center justify-between text-sm text-text-muted mt-auto">
-      <span class="flex items-center gap-2">
-        <span>{{ formatDate(post.date) }}</span>
-        <span>·</span>
-        <span>{{ post.readingTime || '5 分钟阅读' }}</span>
+    <div class="flex items-center justify-between text-sm text-mute border-t border-soft pt-4">
+      <span>{{ formatDate(post.date) }}</span>
+      <span class="inline-flex items-center gap-1.5 text-[var(--brand)]">
+        阅读全文
+        <svg
+          class="w-4 h-4 transition-transform group-hover:translate-x-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5l7 7-7 7" />
+        </svg>
       </span>
-
-      <svg
-        class="w-4 h-4 transform group-hover:translate-x-1 transition-transform text-text-secondary group-hover:text-accent-purple"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-      </svg>
-    </span>
+    </div>
   </NuxtLink>
 </template>
 
-<script setup>
-const props = defineProps({
-  post: {
-    type: Object,
-    required: true
-  }
-})
+<script setup lang="ts">
+const props = defineProps<{ post: Record<string, any> }>()
 
-function formatDate(date) {
-  if (!date) return ''
-  const d = new Date(date)
-  return d.toLocaleDateString('zh-CN', {
+const readingLabel = computed(() => props.post.readingTime || '6 分钟阅读')
+
+function formatDate(date?: string) {
+  if (!date) return '未标注日期'
+  return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    timeZone: 'UTC'
+    timeZone: 'UTC',
   })
 }
 </script>

@@ -2,7 +2,7 @@ import { db } from '~/server/database'
 import { tags } from '~/server/database/schema'
 import { desc } from 'drizzle-orm'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async () => {
   const list = await db.select().from(tags).orderBy(desc(tags.createdAt))
   return { list }
 })

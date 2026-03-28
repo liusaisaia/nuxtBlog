@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     copyright: `All rights reserved ${new Date().getFullYear()}, VoidZero Blog`,
   })
   
-  const docs = await queryCollection(event, 'content')
+  const docs = await queryCollection('content')
     .order('date', 'DESC')
     .all()
   

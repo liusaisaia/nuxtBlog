@@ -10,20 +10,20 @@ import Database from 'better-sqlite3';
 import { fileURLToPath } from 'node:url';
 import { ipxFSStorage, ipxHttpStorage, createIPX, createIPXH3Handler } from 'ipx';
 
-const suspectProtoRx$1 = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
-const suspectConstructorRx$1 = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
-const JsonSigRx$1 = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
-function jsonParseTransform$1(key, value) {
+const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
+const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
+const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
+function jsonParseTransform(key, value) {
   if (key === "__proto__" || key === "constructor" && value && typeof value === "object" && "prototype" in value) {
-    warnKeyDropped$1(key);
+    warnKeyDropped(key);
     return;
   }
   return value;
 }
-function warnKeyDropped$1(key) {
+function warnKeyDropped(key) {
   console.warn(`[destr] Dropping "${key}" key to prevent prototype pollution.`);
 }
-function destr$1(value, options = {}) {
+function destr(value, options = {}) {
   if (typeof value !== "string") {
     return value;
   }
@@ -56,18 +56,18 @@ function destr$1(value, options = {}) {
       }
     }
   }
-  if (!JsonSigRx$1.test(value)) {
+  if (!JsonSigRx.test(value)) {
     if (options.strict) {
       throw new SyntaxError("[destr] Invalid JSON");
     }
     return value;
   }
   try {
-    if (suspectProtoRx$1.test(value) || suspectConstructorRx$1.test(value)) {
+    if (suspectProtoRx.test(value) || suspectConstructorRx.test(value)) {
       if (options.strict) {
         throw new Error("[destr] Possible prototype pollution");
       }
-      return JSON.parse(value, jsonParseTransform$1);
+      return JSON.parse(value, jsonParseTransform);
     }
     return JSON.parse(value);
   } catch (error) {
@@ -78,39 +78,51 @@ function destr$1(value, options = {}) {
   }
 }
 
-const HASH_RE$1 = /#/g;
-const AMPERSAND_RE$1 = /&/g;
-const SLASH_RE$1 = /\//g;
-const EQUAL_RE$1 = /=/g;
-const PLUS_RE$1 = /\+/g;
-const ENC_CARET_RE$1 = /%5e/gi;
-const ENC_BACKTICK_RE$1 = /%60/gi;
-const ENC_PIPE_RE$1 = /%7c/gi;
-const ENC_SPACE_RE$1 = /%20/gi;
-function encode$1(text) {
-  return encodeURI("" + text).replace(ENC_PIPE_RE$1, "|");
+const HASH_RE = /#/g;
+const AMPERSAND_RE = /&/g;
+const SLASH_RE = /\//g;
+const EQUAL_RE = /=/g;
+const IM_RE = /\?/g;
+const PLUS_RE = /\+/g;
+const ENC_CARET_RE = /%5e/gi;
+const ENC_BACKTICK_RE = /%60/gi;
+const ENC_PIPE_RE = /%7c/gi;
+const ENC_SPACE_RE = /%20/gi;
+const ENC_SLASH_RE = /%2f/gi;
+const ENC_ENC_SLASH_RE = /%252f/gi;
+function encode(text) {
+  return encodeURI("" + text).replace(ENC_PIPE_RE, "|");
 }
-function encodeQueryValue$1(input) {
-  return encode$1(typeof input === "string" ? input : JSON.stringify(input)).replace(PLUS_RE$1, "%2B").replace(ENC_SPACE_RE$1, "+").replace(HASH_RE$1, "%23").replace(AMPERSAND_RE$1, "%26").replace(ENC_BACKTICK_RE$1, "`").replace(ENC_CARET_RE$1, "^").replace(SLASH_RE$1, "%2F");
+function encodeQueryValue(input) {
+  return encode(typeof input === "string" ? input : JSON.stringify(input)).replace(PLUS_RE, "%2B").replace(ENC_SPACE_RE, "+").replace(HASH_RE, "%23").replace(AMPERSAND_RE, "%26").replace(ENC_BACKTICK_RE, "`").replace(ENC_CARET_RE, "^").replace(SLASH_RE, "%2F");
 }
-function encodeQueryKey$1(text) {
-  return encodeQueryValue$1(text).replace(EQUAL_RE$1, "%3D");
+function encodeQueryKey(text) {
+  return encodeQueryValue(text).replace(EQUAL_RE, "%3D");
 }
-function decode$3(text = "") {
+function encodePath(text) {
+  return encode(text).replace(HASH_RE, "%23").replace(IM_RE, "%3F").replace(ENC_ENC_SLASH_RE, "%2F").replace(AMPERSAND_RE, "%26").replace(PLUS_RE, "%2B");
+}
+function encodeParam(text) {
+  return encodePath(text).replace(SLASH_RE, "%2F");
+}
+function decode$2(text = "") {
   try {
     return decodeURIComponent("" + text);
   } catch {
     return "" + text;
   }
 }
-function decodeQueryKey$1(text) {
-  return decode$3(text.replace(PLUS_RE$1, " "));
+function decodePath(text) {
+  return decode$2(text.replace(ENC_SLASH_RE, "%252F"));
 }
-function decodeQueryValue$1(text) {
-  return decode$3(text.replace(PLUS_RE$1, " "));
+function decodeQueryKey(text) {
+  return decode$2(text.replace(PLUS_RE, " "));
+}
+function decodeQueryValue(text) {
+  return decode$2(text.replace(PLUS_RE, " "));
 }
 
-function parseQuery$1(parametersString = "") {
+function parseQuery(parametersString = "") {
   const object = /* @__PURE__ */ Object.create(null);
   if (parametersString[0] === "?") {
     parametersString = parametersString.slice(1);
@@ -120,11 +132,11 @@ function parseQuery$1(parametersString = "") {
     if (s.length < 2) {
       continue;
     }
-    const key = decodeQueryKey$1(s[1]);
+    const key = decodeQueryKey(s[1]);
     if (key === "__proto__" || key === "constructor") {
       continue;
     }
-    const value = decodeQueryValue$1(s[2] || "");
+    const value = decodeQueryValue(s[2] || "");
     if (object[key] === void 0) {
       object[key] = value;
     } else if (Array.isArray(object[key])) {
@@ -135,76 +147,110 @@ function parseQuery$1(parametersString = "") {
   }
   return object;
 }
-function encodeQueryItem$1(key, value) {
+function encodeQueryItem(key, value) {
   if (typeof value === "number" || typeof value === "boolean") {
     value = String(value);
   }
   if (!value) {
-    return encodeQueryKey$1(key);
+    return encodeQueryKey(key);
   }
   if (Array.isArray(value)) {
     return value.map(
-      (_value) => `${encodeQueryKey$1(key)}=${encodeQueryValue$1(_value)}`
+      (_value) => `${encodeQueryKey(key)}=${encodeQueryValue(_value)}`
     ).join("&");
   }
-  return `${encodeQueryKey$1(key)}=${encodeQueryValue$1(value)}`;
+  return `${encodeQueryKey(key)}=${encodeQueryValue(value)}`;
 }
-function stringifyQuery$1(query) {
-  return Object.keys(query).filter((k) => query[k] !== void 0).map((k) => encodeQueryItem$1(k, query[k])).filter(Boolean).join("&");
+function stringifyQuery(query) {
+  return Object.keys(query).filter((k) => query[k] !== void 0).map((k) => encodeQueryItem(k, query[k])).filter(Boolean).join("&");
 }
 
-const PROTOCOL_STRICT_REGEX$1 = /^[\s\w\0+.-]{2,}:([/\\]{1,2})/;
-const PROTOCOL_REGEX$1 = /^[\s\w\0+.-]{2,}:([/\\]{2})?/;
-const PROTOCOL_RELATIVE_REGEX$1 = /^([/\\]\s*){2,}[^/\\]/;
-const JOIN_LEADING_SLASH_RE$1 = /^\.?\//;
-function hasProtocol$1(inputString, opts = {}) {
+const PROTOCOL_STRICT_REGEX = /^[\s\w\0+.-]{2,}:([/\\]{1,2})/;
+const PROTOCOL_REGEX = /^[\s\w\0+.-]{2,}:([/\\]{2})?/;
+const PROTOCOL_RELATIVE_REGEX = /^([/\\]\s*){2,}[^/\\]/;
+const PROTOCOL_SCRIPT_RE = /^[\s\0]*(blob|data|javascript|vbscript):$/i;
+const TRAILING_SLASH_RE = /\/$|\/\?|\/#/;
+const JOIN_LEADING_SLASH_RE = /^\.?\//;
+function hasProtocol(inputString, opts = {}) {
   if (typeof opts === "boolean") {
     opts = { acceptRelative: opts };
   }
   if (opts.strict) {
-    return PROTOCOL_STRICT_REGEX$1.test(inputString);
+    return PROTOCOL_STRICT_REGEX.test(inputString);
   }
-  return PROTOCOL_REGEX$1.test(inputString) || (opts.acceptRelative ? PROTOCOL_RELATIVE_REGEX$1.test(inputString) : false);
+  return PROTOCOL_REGEX.test(inputString) || (opts.acceptRelative ? PROTOCOL_RELATIVE_REGEX.test(inputString) : false);
 }
-function hasTrailingSlash$1(input = "", respectQueryAndFragment) {
-  {
+function isScriptProtocol(protocol) {
+  return !!protocol && PROTOCOL_SCRIPT_RE.test(protocol);
+}
+function hasTrailingSlash(input = "", respectQueryAndFragment) {
+  if (!respectQueryAndFragment) {
     return input.endsWith("/");
   }
+  return TRAILING_SLASH_RE.test(input);
 }
-function withoutTrailingSlash$1(input = "", respectQueryAndFragment) {
-  {
-    return (hasTrailingSlash$1(input) ? input.slice(0, -1) : input) || "/";
+function withoutTrailingSlash(input = "", respectQueryAndFragment) {
+  if (!respectQueryAndFragment) {
+    return (hasTrailingSlash(input) ? input.slice(0, -1) : input) || "/";
   }
+  if (!hasTrailingSlash(input, true)) {
+    return input || "/";
+  }
+  let path = input;
+  let fragment = "";
+  const fragmentIndex = input.indexOf("#");
+  if (fragmentIndex !== -1) {
+    path = input.slice(0, fragmentIndex);
+    fragment = input.slice(fragmentIndex);
+  }
+  const [s0, ...s] = path.split("?");
+  const cleanPath = s0.endsWith("/") ? s0.slice(0, -1) : s0;
+  return (cleanPath || "/") + (s.length > 0 ? `?${s.join("?")}` : "") + fragment;
 }
-function withTrailingSlash$1(input = "", respectQueryAndFragment) {
-  {
+function withTrailingSlash(input = "", respectQueryAndFragment) {
+  if (!respectQueryAndFragment) {
     return input.endsWith("/") ? input : input + "/";
   }
+  if (hasTrailingSlash(input, true)) {
+    return input || "/";
+  }
+  let path = input;
+  let fragment = "";
+  const fragmentIndex = input.indexOf("#");
+  if (fragmentIndex !== -1) {
+    path = input.slice(0, fragmentIndex);
+    fragment = input.slice(fragmentIndex);
+    if (!path) {
+      return fragment;
+    }
+  }
+  const [s0, ...s] = path.split("?");
+  return s0 + "/" + (s.length > 0 ? `?${s.join("?")}` : "") + fragment;
 }
-function hasLeadingSlash$1(input = "") {
+function hasLeadingSlash(input = "") {
   return input.startsWith("/");
 }
-function withLeadingSlash$1(input = "") {
-  return hasLeadingSlash$1(input) ? input : "/" + input;
+function withLeadingSlash(input = "") {
+  return hasLeadingSlash(input) ? input : "/" + input;
 }
 function withBase(input, base) {
-  if (isEmptyURL$1(base) || hasProtocol$1(input)) {
+  if (isEmptyURL(base) || hasProtocol(input)) {
     return input;
   }
-  const _base = withoutTrailingSlash$1(base);
+  const _base = withoutTrailingSlash(base);
   if (input.startsWith(_base)) {
     const nextChar = input[_base.length];
     if (!nextChar || nextChar === "/" || nextChar === "?") {
       return input;
     }
   }
-  return joinURL$1(_base, input);
+  return joinURL(_base, input);
 }
-function withoutBase$1(input, base) {
-  if (isEmptyURL$1(base)) {
+function withoutBase(input, base) {
+  if (isEmptyURL(base)) {
     return input;
   }
-  const _base = withoutTrailingSlash$1(base);
+  const _base = withoutTrailingSlash(base);
   if (!input.startsWith(_base)) {
     return input;
   }
@@ -215,27 +261,27 @@ function withoutBase$1(input, base) {
   const trimmed = input.slice(_base.length);
   return trimmed[0] === "/" ? trimmed : "/" + trimmed;
 }
-function withQuery$1(input, query) {
-  const parsed = parseURL$1(input);
-  const mergedQuery = { ...parseQuery$1(parsed.search), ...query };
-  parsed.search = stringifyQuery$1(mergedQuery);
-  return stringifyParsedURL$1(parsed);
+function withQuery(input, query) {
+  const parsed = parseURL(input);
+  const mergedQuery = { ...parseQuery(parsed.search), ...query };
+  parsed.search = stringifyQuery(mergedQuery);
+  return stringifyParsedURL(parsed);
 }
 function getQuery$1(input) {
-  return parseQuery$1(parseURL$1(input).search);
+  return parseQuery(parseURL(input).search);
 }
-function isEmptyURL$1(url) {
+function isEmptyURL(url) {
   return !url || url === "/";
 }
-function isNonEmptyURL$1(url) {
+function isNonEmptyURL(url) {
   return url && url !== "/";
 }
-function joinURL$1(base, ...input) {
+function joinURL(base, ...input) {
   let url = base || "";
-  for (const segment of input.filter((url2) => isNonEmptyURL$1(url2))) {
+  for (const segment of input.filter((url2) => isNonEmptyURL(url2))) {
     if (url) {
-      const _segment = segment.replace(JOIN_LEADING_SLASH_RE$1, "");
-      url = withTrailingSlash$1(url) + _segment;
+      const _segment = segment.replace(JOIN_LEADING_SLASH_RE, "");
+      url = withTrailingSlash(url) + _segment;
     } else {
       url = segment;
     }
@@ -256,7 +302,7 @@ function joinRelativeURL(..._input) {
         continue;
       }
       if (s === "..") {
-        if (segments.length === 1 && hasProtocol$1(segments[0])) {
+        if (segments.length === 1 && hasProtocol(segments[0])) {
           continue;
         }
         segments.pop();
@@ -287,8 +333,8 @@ function joinRelativeURL(..._input) {
   return url;
 }
 
-const protocolRelative$1 = Symbol.for("ufo:protocolRelative");
-function parseURL$1(input = "", defaultProto) {
+const protocolRelative = Symbol.for("ufo:protocolRelative");
+function parseURL(input = "", defaultProto) {
   const _specialProtoMatch = input.match(
     /^[\s\0]*(blob:|data:|javascript:|vbscript:)(.*)/i
   );
@@ -304,15 +350,15 @@ function parseURL$1(input = "", defaultProto) {
       hash: ""
     };
   }
-  if (!hasProtocol$1(input, { acceptRelative: true })) {
-    return parsePath$1(input);
+  if (!hasProtocol(input, { acceptRelative: true })) {
+    return parsePath(input);
   }
   const [, protocol = "", auth, hostAndPath = ""] = input.replace(/\\/g, "/").match(/^[\s\0]*([\w+.-]{2,}:)?\/\/([^/@]+@)?(.*)/) || [];
   let [, host = "", path = ""] = hostAndPath.match(/([^#/?]*)(.*)?/) || [];
   if (protocol === "file:") {
     path = path.replace(/\/(?=[A-Za-z]:)/, "");
   }
-  const { pathname, search, hash } = parsePath$1(path);
+  const { pathname, search, hash } = parsePath(path);
   return {
     protocol: protocol.toLowerCase(),
     auth: auth ? auth.slice(0, Math.max(0, auth.length - 1)) : "",
@@ -320,10 +366,10 @@ function parseURL$1(input = "", defaultProto) {
     pathname,
     search,
     hash,
-    [protocolRelative$1]: !protocol
+    [protocolRelative]: !protocol
   };
 }
-function parsePath$1(input = "") {
+function parsePath(input = "") {
   const [pathname = "", search = "", hash = ""] = (input.match(/([^#?]*)(\?[^#]*)?(#.*)?/) || []).splice(1);
   return {
     pathname,
@@ -331,13 +377,13 @@ function parsePath$1(input = "") {
     hash
   };
 }
-function stringifyParsedURL$1(parsed) {
+function stringifyParsedURL(parsed) {
   const pathname = parsed.pathname || "";
   const search = parsed.search ? (parsed.search.startsWith("?") ? "" : "?") + parsed.search : "";
   const hash = parsed.hash || "";
   const auth = parsed.auth ? parsed.auth + "@" : "";
   const host = parsed.host || "";
-  const proto = parsed.protocol || parsed[protocolRelative$1] ? (parsed.protocol || "") + "//" : "";
+  const proto = parsed.protocol || parsed[protocolRelative] ? (parsed.protocol || "") + "//" : "";
   return proto + auth + host + pathname + search + hash;
 }
 
@@ -347,7 +393,7 @@ function parse$2(str, options) {
   }
   const obj = {};
   const opt = {};
-  const dec = opt.decode || decode$2;
+  const dec = opt.decode || decode$1;
   let index = 0;
   while (index < str.length) {
     const eqIdx = str.indexOf("=", index);
@@ -377,7 +423,7 @@ function parse$2(str, options) {
   }
   return obj;
 }
-function decode$2(str) {
+function decode$1(str) {
   return str.includes("%") ? decodeURIComponent(str) : str;
 }
 function tryDecode$1(str, decode2) {
@@ -388,18 +434,18 @@ function tryDecode$1(str, decode2) {
   }
 }
 
-const fieldContentRegExp$1 = /^[\u0009\u0020-\u007E\u0080-\u00FF]+$/;
+const fieldContentRegExp = /^[\u0009\u0020-\u007E\u0080-\u00FF]+$/;
 function serialize$2(name, value, options) {
   const opt = options || {};
   const enc = opt.encode || encodeURIComponent;
   if (typeof enc !== "function") {
     throw new TypeError("option encode is invalid");
   }
-  if (!fieldContentRegExp$1.test(name)) {
+  if (!fieldContentRegExp.test(name)) {
     throw new TypeError("argument name is invalid");
   }
   const encodedValue = enc(value);
-  if (encodedValue && !fieldContentRegExp$1.test(encodedValue)) {
+  if (encodedValue && !fieldContentRegExp.test(encodedValue)) {
     throw new TypeError("argument val is invalid");
   }
   let str = name + "=" + encodedValue;
@@ -411,19 +457,19 @@ function serialize$2(name, value, options) {
     str += "; Max-Age=" + Math.floor(maxAge);
   }
   if (opt.domain) {
-    if (!fieldContentRegExp$1.test(opt.domain)) {
+    if (!fieldContentRegExp.test(opt.domain)) {
       throw new TypeError("option domain is invalid");
     }
     str += "; Domain=" + opt.domain;
   }
   if (opt.path) {
-    if (!fieldContentRegExp$1.test(opt.path)) {
+    if (!fieldContentRegExp.test(opt.path)) {
       throw new TypeError("option path is invalid");
     }
     str += "; Path=" + opt.path;
   }
   if (opt.expires) {
-    if (!isDate$1(opt.expires) || Number.isNaN(opt.expires.valueOf())) {
+    if (!isDate(opt.expires) || Number.isNaN(opt.expires.valueOf())) {
       throw new TypeError("option expires is invalid");
     }
     str += "; Expires=" + opt.expires.toUTCString();
@@ -483,14 +529,14 @@ function serialize$2(name, value, options) {
   }
   return str;
 }
-function isDate$1(val) {
+function isDate(val) {
   return Object.prototype.toString.call(val) === "[object Date]" || val instanceof Date;
 }
 
-function parseSetCookie$1(setCookieValue, options) {
+function parseSetCookie(setCookieValue, options) {
   const parts = (setCookieValue || "").split(";").filter((str) => typeof str === "string" && !!str.trim());
   const nameValuePairStr = parts.shift() || "";
-  const parsed = _parseNameValuePair$1(nameValuePairStr);
+  const parsed = _parseNameValuePair(nameValuePairStr);
   const name = parsed.name;
   let value = parsed.value;
   try {
@@ -533,7 +579,7 @@ function parseSetCookie$1(setCookieValue, options) {
   }
   return cookie;
 }
-function _parseNameValuePair$1(nameValuePairStr) {
+function _parseNameValuePair(nameValuePairStr) {
   let name = "";
   let value = "";
   const nameValueArr = nameValuePairStr.split("=");
@@ -775,7 +821,7 @@ function _routerNodeToTable(initialPath, initialNode) {
   return table;
 }
 
-function isPlainObject$1(value) {
+function isPlainObject(value) {
   if (value === null || typeof value !== "object") {
     return false;
   }
@@ -792,9 +838,9 @@ function isPlainObject$1(value) {
   return true;
 }
 
-function _defu$1(baseObject, defaults, namespace = ".", merger) {
-  if (!isPlainObject$1(defaults)) {
-    return _defu$1(baseObject, {}, namespace, merger);
+function _defu(baseObject, defaults, namespace = ".", merger) {
+  if (!isPlainObject(defaults)) {
+    return _defu(baseObject, {}, namespace, merger);
   }
   const object = Object.assign({}, defaults);
   for (const key in baseObject) {
@@ -810,8 +856,8 @@ function _defu$1(baseObject, defaults, namespace = ".", merger) {
     }
     if (Array.isArray(value) && Array.isArray(object[key])) {
       object[key] = [...value, ...object[key]];
-    } else if (isPlainObject$1(value) && isPlainObject$1(object[key])) {
-      object[key] = _defu$1(
+    } else if (isPlainObject(value) && isPlainObject(object[key])) {
+      object[key] = _defu(
         value,
         object[key],
         (namespace ? `${namespace}.` : "") + key.toString(),
@@ -823,23 +869,41 @@ function _defu$1(baseObject, defaults, namespace = ".", merger) {
   }
   return object;
 }
-function createDefu$1(merger) {
+function createDefu(merger) {
   return (...arguments_) => (
     // eslint-disable-next-line unicorn/no-array-reduce
-    arguments_.reduce((p, c) => _defu$1(p, c, "", merger), {})
+    arguments_.reduce((p, c) => _defu(p, c, "", merger), {})
   );
 }
-const defu$1 = createDefu$1();
-const defuFn = createDefu$1((object, key, currentValue) => {
+const defu = createDefu();
+const defuFn = createDefu((object, key, currentValue) => {
   if (object[key] !== void 0 && typeof currentValue === "function") {
     object[key] = currentValue(object[key]);
     return true;
   }
 });
 
-function o(n){throw new Error(`${n} is not implemented yet!`)}let i$1 = class i extends EventEmitter{__unenv__={};readableEncoding=null;readableEnded=true;readableFlowing=false;readableHighWaterMark=0;readableLength=0;readableObjectMode=false;readableAborted=false;readableDidRead=false;closed=false;errored=null;readable=false;destroyed=false;static from(e,t){return new i(t)}constructor(e){super();}_read(e){}read(e){}setEncoding(e){return this}pause(){return this}resume(){return this}isPaused(){return  true}unpipe(e){return this}unshift(e,t){}wrap(e){return this}push(e,t){return  false}_destroy(e,t){this.removeAllListeners();}destroy(e){return this.destroyed=true,this._destroy(e),this}pipe(e,t){return {}}compose(e,t){throw new Error("Method not implemented.")}[Symbol.asyncDispose](){return this.destroy(),Promise.resolve()}async*[Symbol.asyncIterator](){throw o("Readable.asyncIterator")}iterator(e){throw o("Readable.iterator")}map(e,t){throw o("Readable.map")}filter(e,t){throw o("Readable.filter")}forEach(e,t){throw o("Readable.forEach")}reduce(e,t,r){throw o("Readable.reduce")}find(e,t){throw o("Readable.find")}findIndex(e,t){throw o("Readable.findIndex")}some(e,t){throw o("Readable.some")}toArray(e){throw o("Readable.toArray")}every(e,t){throw o("Readable.every")}flatMap(e,t){throw o("Readable.flatMap")}drop(e,t){throw o("Readable.drop")}take(e,t){throw o("Readable.take")}asIndexedPairs(e){throw o("Readable.asIndexedPairs")}};let l$1 = class l extends EventEmitter{__unenv__={};writable=true;writableEnded=false;writableFinished=false;writableHighWaterMark=0;writableLength=0;writableObjectMode=false;writableCorked=0;closed=false;errored=null;writableNeedDrain=false;writableAborted=false;destroyed=false;_data;_encoding="utf8";constructor(e){super();}pipe(e,t){return {}}_write(e,t,r){if(this.writableEnded){r&&r();return}if(this._data===void 0)this._data=e;else {const s=typeof this._data=="string"?Buffer$1.from(this._data,this._encoding||t||"utf8"):this._data,a=typeof e=="string"?Buffer$1.from(e,t||this._encoding||"utf8"):e;this._data=Buffer$1.concat([s,a]);}this._encoding=t,r&&r();}_writev(e,t){}_destroy(e,t){}_final(e){}write(e,t,r){const s=typeof t=="string"?this._encoding:"utf8",a=typeof t=="function"?t:typeof r=="function"?r:void 0;return this._write(e,s,a),true}setDefaultEncoding(e){return this}end(e,t,r){const s=typeof e=="function"?e:typeof t=="function"?t:typeof r=="function"?r:void 0;if(this.writableEnded)return s&&s(),this;const a=e===s?void 0:e;if(a){const u=t===s?void 0:t;this.write(a,u,s);}return this.writableEnded=true,this.writableFinished=true,this.emit("close"),this.emit("finish"),this}cork(){}uncork(){}destroy(e){return this.destroyed=true,delete this._data,this.removeAllListeners(),this}compose(e,t){throw new Error("Method not implemented.")}[Symbol.asyncDispose](){return Promise.resolve()}};const c=class{allowHalfOpen=true;_destroy;constructor(e=new i$1,t=new l$1){Object.assign(this,e),Object.assign(this,t),this._destroy=m(e._destroy,t._destroy);}};function _(){return Object.assign(c.prototype,i$1.prototype),Object.assign(c.prototype,l$1.prototype),c}function m(...n){return function(...e){for(const t of n)t(...e);}}const g=_();class A extends g{__unenv__={};bufferSize=0;bytesRead=0;bytesWritten=0;connecting=false;destroyed=false;pending=false;localAddress="";localPort=0;remoteAddress="";remoteFamily="";remotePort=0;autoSelectFamilyAttemptedAddresses=[];readyState="readOnly";constructor(e){super();}write(e,t,r){return  false}connect(e,t,r){return this}end(e,t,r){return this}setEncoding(e){return this}pause(){return this}resume(){return this}setTimeout(e,t){return this}setNoDelay(e){return this}setKeepAlive(e,t){return this}address(){return {}}unref(){return this}ref(){return this}destroySoon(){this.destroy();}resetAndDestroy(){const e=new Error("ERR_SOCKET_CLOSED");return e.code="ERR_SOCKET_CLOSED",this.destroy(e),this}}class y extends i$1{aborted=false;httpVersion="1.1";httpVersionMajor=1;httpVersionMinor=1;complete=true;connection;socket;headers={};trailers={};method="GET";url="/";statusCode=200;statusMessage="";closed=false;errored=null;readable=false;constructor(e){super(),this.socket=this.connection=e||new A;}get rawHeaders(){const e=this.headers,t=[];for(const r in e)if(Array.isArray(e[r]))for(const s of e[r])t.push(r,s);else t.push(r,e[r]);return t}get rawTrailers(){return []}setTimeout(e,t){return this}get headersDistinct(){return p(this.headers)}get trailersDistinct(){return p(this.trailers)}}function p(n){const e={};for(const[t,r]of Object.entries(n))t&&(e[t]=(Array.isArray(r)?r:[r]).filter(Boolean));return e}class w extends l$1{statusCode=200;statusMessage="";upgrading=false;chunkedEncoding=false;shouldKeepAlive=false;useChunkedEncodingByDefault=false;sendDate=false;finished=false;headersSent=false;strictContentLength=false;connection=null;socket=null;req;_headers={};constructor(e){super(),this.req=e;}assignSocket(e){e._httpMessage=this,this.socket=e,this.connection=e,this.emit("socket",e),this._flush();}_flush(){this.flushHeaders();}detachSocket(e){}writeContinue(e){}writeHead(e,t,r){e&&(this.statusCode=e),typeof t=="string"&&(this.statusMessage=t,t=void 0);const s=r||t;if(s&&!Array.isArray(s))for(const a in s)this.setHeader(a,s[a]);return this.headersSent=true,this}writeProcessing(){}setTimeout(e,t){return this}appendHeader(e,t){e=e.toLowerCase();const r=this._headers[e],s=[...Array.isArray(r)?r:[r],...Array.isArray(t)?t:[t]].filter(Boolean);return this._headers[e]=s.length>1?s:s[0],this}setHeader(e,t){return this._headers[e.toLowerCase()]=t,this}setHeaders(e){for(const[t,r]of Object.entries(e))this.setHeader(t,r);return this}getHeader(e){return this._headers[e.toLowerCase()]}getHeaders(){return this._headers}getHeaderNames(){return Object.keys(this._headers)}hasHeader(e){return e.toLowerCase()in this._headers}removeHeader(e){delete this._headers[e.toLowerCase()];}addTrailers(e){}flushHeaders(){}writeEarlyHints(e,t){typeof t=="function"&&t();}}const E=(()=>{const n=function(){};return n.prototype=Object.create(null),n})();function R(n={}){const e=new E,t=Array.isArray(n)||H(n)?n:Object.entries(n);for(const[r,s]of t)if(s){if(e[r]===void 0){e[r]=s;continue}e[r]=[...Array.isArray(e[r])?e[r]:[e[r]],...Array.isArray(s)?s:[s]];}return e}function H(n){return typeof n?.entries=="function"}function v(n={}){if(n instanceof Headers)return n;const e=new Headers;for(const[t,r]of Object.entries(n))if(r!==void 0){if(Array.isArray(r)){for(const s of r)e.append(t,String(s));continue}e.set(t,String(r));}return e}const S=new Set([101,204,205,304]);async function b(n,e){const t=new y,r=new w(t);t.url=e.url?.toString()||"/";let s;if(!t.url.startsWith("/")){const d=new URL(t.url);s=d.host,t.url=d.pathname+d.search+d.hash;}t.method=e.method||"GET",t.headers=R(e.headers||{}),t.headers.host||(t.headers.host=e.host||s||"localhost"),t.connection.encrypted=t.connection.encrypted||e.protocol==="https",t.body=e.body||null,t.__unenv__=e.context,await n(t,r);let a=r._data;(S.has(r.statusCode)||t.method.toUpperCase()==="HEAD")&&(a=null,delete r._headers["content-length"]);const u={status:r.statusCode,statusText:r.statusMessage,headers:r._headers,body:a};return t.destroy(),r.destroy(),u}async function C(n,e,t={}){try{const r=await b(n,{url:e,...t});return new Response(r.body,{status:r.status,statusText:r.statusText,headers:v(r.headers)})}catch(r){return new Response(r.toString(),{status:Number.parseInt(r.statusCode||r.code)||500,statusText:r.statusText})}}
+function o(n){throw new Error(`${n} is not implemented yet!`)}let i$1 = class i extends EventEmitter{__unenv__={};readableEncoding=null;readableEnded=true;readableFlowing=false;readableHighWaterMark=0;readableLength=0;readableObjectMode=false;readableAborted=false;readableDidRead=false;closed=false;errored=null;readable=false;destroyed=false;static from(e,t){return new i(t)}constructor(e){super();}_read(e){}read(e){}setEncoding(e){return this}pause(){return this}resume(){return this}isPaused(){return  true}unpipe(e){return this}unshift(e,t){}wrap(e){return this}push(e,t){return  false}_destroy(e,t){this.removeAllListeners();}destroy(e){return this.destroyed=true,this._destroy(e),this}pipe(e,t){return {}}compose(e,t){throw new Error("Method not implemented.")}[Symbol.asyncDispose](){return this.destroy(),Promise.resolve()}async*[Symbol.asyncIterator](){throw o("Readable.asyncIterator")}iterator(e){throw o("Readable.iterator")}map(e,t){throw o("Readable.map")}filter(e,t){throw o("Readable.filter")}forEach(e,t){throw o("Readable.forEach")}reduce(e,t,r){throw o("Readable.reduce")}find(e,t){throw o("Readable.find")}findIndex(e,t){throw o("Readable.findIndex")}some(e,t){throw o("Readable.some")}toArray(e){throw o("Readable.toArray")}every(e,t){throw o("Readable.every")}flatMap(e,t){throw o("Readable.flatMap")}drop(e,t){throw o("Readable.drop")}take(e,t){throw o("Readable.take")}asIndexedPairs(e){throw o("Readable.asIndexedPairs")}};let l$1 = class l extends EventEmitter{__unenv__={};writable=true;writableEnded=false;writableFinished=false;writableHighWaterMark=0;writableLength=0;writableObjectMode=false;writableCorked=0;closed=false;errored=null;writableNeedDrain=false;writableAborted=false;destroyed=false;_data;_encoding="utf8";constructor(e){super();}pipe(e,t){return {}}_write(e,t,r){if(this.writableEnded){r&&r();return}if(this._data===void 0)this._data=e;else {const s=typeof this._data=="string"?Buffer$1.from(this._data,this._encoding||t||"utf8"):this._data,a=typeof e=="string"?Buffer$1.from(e,t||this._encoding||"utf8"):e;this._data=Buffer$1.concat([s,a]);}this._encoding=t,r&&r();}_writev(e,t){}_destroy(e,t){}_final(e){}write(e,t,r){const s=typeof t=="string"?this._encoding:"utf8",a=typeof t=="function"?t:typeof r=="function"?r:void 0;return this._write(e,s,a),true}setDefaultEncoding(e){return this}end(e,t,r){const s=typeof e=="function"?e:typeof t=="function"?t:typeof r=="function"?r:void 0;if(this.writableEnded)return s&&s(),this;const a=e===s?void 0:e;if(a){const u=t===s?void 0:t;this.write(a,u,s);}return this.writableEnded=true,this.writableFinished=true,this.emit("close"),this.emit("finish"),this}cork(){}uncork(){}destroy(e){return this.destroyed=true,delete this._data,this.removeAllListeners(),this}compose(e,t){throw new Error("Method not implemented.")}[Symbol.asyncDispose](){return Promise.resolve()}};const c$1=class c{allowHalfOpen=true;_destroy;constructor(e=new i$1,t=new l$1){Object.assign(this,e),Object.assign(this,t),this._destroy=m(e._destroy,t._destroy);}};function _(){return Object.assign(c$1.prototype,i$1.prototype),Object.assign(c$1.prototype,l$1.prototype),c$1}function m(...n){return function(...e){for(const t of n)t(...e);}}const g=_();class A extends g{__unenv__={};bufferSize=0;bytesRead=0;bytesWritten=0;connecting=false;destroyed=false;pending=false;localAddress="";localPort=0;remoteAddress="";remoteFamily="";remotePort=0;autoSelectFamilyAttemptedAddresses=[];readyState="readOnly";constructor(e){super();}write(e,t,r){return  false}connect(e,t,r){return this}end(e,t,r){return this}setEncoding(e){return this}pause(){return this}resume(){return this}setTimeout(e,t){return this}setNoDelay(e){return this}setKeepAlive(e,t){return this}address(){return {}}unref(){return this}ref(){return this}destroySoon(){this.destroy();}resetAndDestroy(){const e=new Error("ERR_SOCKET_CLOSED");return e.code="ERR_SOCKET_CLOSED",this.destroy(e),this}}class y extends i$1{aborted=false;httpVersion="1.1";httpVersionMajor=1;httpVersionMinor=1;complete=true;connection;socket;headers={};trailers={};method="GET";url="/";statusCode=200;statusMessage="";closed=false;errored=null;readable=false;constructor(e){super(),this.socket=this.connection=e||new A;}get rawHeaders(){const e=this.headers,t=[];for(const r in e)if(Array.isArray(e[r]))for(const s of e[r])t.push(r,s);else t.push(r,e[r]);return t}get rawTrailers(){return []}setTimeout(e,t){return this}get headersDistinct(){return p(this.headers)}get trailersDistinct(){return p(this.trailers)}}function p(n){const e={};for(const[t,r]of Object.entries(n))t&&(e[t]=(Array.isArray(r)?r:[r]).filter(Boolean));return e}class w extends l$1{statusCode=200;statusMessage="";upgrading=false;chunkedEncoding=false;shouldKeepAlive=false;useChunkedEncodingByDefault=false;sendDate=false;finished=false;headersSent=false;strictContentLength=false;connection=null;socket=null;req;_headers={};constructor(e){super(),this.req=e;}assignSocket(e){e._httpMessage=this,this.socket=e,this.connection=e,this.emit("socket",e),this._flush();}_flush(){this.flushHeaders();}detachSocket(e){}writeContinue(e){}writeHead(e,t,r){e&&(this.statusCode=e),typeof t=="string"&&(this.statusMessage=t,t=void 0);const s=r||t;if(s&&!Array.isArray(s))for(const a in s)this.setHeader(a,s[a]);return this.headersSent=true,this}writeProcessing(){}setTimeout(e,t){return this}appendHeader(e,t){e=e.toLowerCase();const r=this._headers[e],s=[...Array.isArray(r)?r:[r],...Array.isArray(t)?t:[t]].filter(Boolean);return this._headers[e]=s.length>1?s:s[0],this}setHeader(e,t){return this._headers[e.toLowerCase()]=t,this}setHeaders(e){for(const[t,r]of Object.entries(e))this.setHeader(t,r);return this}getHeader(e){return this._headers[e.toLowerCase()]}getHeaders(){return this._headers}getHeaderNames(){return Object.keys(this._headers)}hasHeader(e){return e.toLowerCase()in this._headers}removeHeader(e){delete this._headers[e.toLowerCase()];}addTrailers(e){}flushHeaders(){}writeEarlyHints(e,t){typeof t=="function"&&t();}}const E=(()=>{const n=function(){};return n.prototype=Object.create(null),n})();function R(n={}){const e=new E,t=Array.isArray(n)||H(n)?n:Object.entries(n);for(const[r,s]of t)if(s){if(e[r]===void 0){e[r]=s;continue}e[r]=[...Array.isArray(e[r])?e[r]:[e[r]],...Array.isArray(s)?s:[s]];}return e}function H(n){return typeof n?.entries=="function"}function v(n={}){if(n instanceof Headers)return n;const e=new Headers;for(const[t,r]of Object.entries(n))if(r!==void 0){if(Array.isArray(r)){for(const s of r)e.append(t,String(s));continue}e.set(t,String(r));}return e}const S=new Set([101,204,205,304]);async function b(n,e){const t=new y,r=new w(t);t.url=e.url?.toString()||"/";let s;if(!t.url.startsWith("/")){const d=new URL(t.url);s=d.host,t.url=d.pathname+d.search+d.hash;}t.method=e.method||"GET",t.headers=R(e.headers||{}),t.headers.host||(t.headers.host=e.host||s||"localhost"),t.connection.encrypted=t.connection.encrypted||e.protocol==="https",t.body=e.body||null,t.__unenv__=e.context,await n(t,r);let a=r._data;(S.has(r.statusCode)||t.method.toUpperCase()==="HEAD")&&(a=null,delete r._headers["content-length"]);const u={status:r.statusCode,statusText:r.statusMessage,headers:r._headers,body:a};return t.destroy(),r.destroy(),u}async function C(n,e,t={}){try{const r=await b(n,{url:e,...t});return new Response(r.body,{status:r.status,statusText:r.statusText,headers:v(r.headers)})}catch(r){return new Response(r.toString(),{status:Number.parseInt(r.statusCode||r.code)||500,statusText:r.statusText})}}
 
-function hasProp$1(obj, prop) {
+function useBase(base, handler) {
+  base = withoutTrailingSlash(base);
+  if (!base || base === "/") {
+    return handler;
+  }
+  return eventHandler(async (event) => {
+    event.node.req.originalUrl = event.node.req.originalUrl || event.node.req.url || "/";
+    const _path = event._path || event.node.req.url || "/";
+    event._path = withoutBase(event.path || "/", base);
+    event.node.req.url = event._path;
+    try {
+      return await handler(event);
+    } finally {
+      event._path = event.node.req.url = _path;
+    }
+  });
+}
+
+function hasProp(obj, prop) {
   try {
     return prop in obj;
   } catch {
@@ -847,7 +911,7 @@ function hasProp$1(obj, prop) {
   }
 }
 
-let H3Error$1 = class H3Error extends Error {
+class H3Error extends Error {
   static __h3_error__ = true;
   statusCode = 500;
   fatal = false;
@@ -864,28 +928,28 @@ let H3Error$1 = class H3Error extends Error {
   toJSON() {
     const obj = {
       message: this.message,
-      statusCode: sanitizeStatusCode$1(this.statusCode, 500)
+      statusCode: sanitizeStatusCode(this.statusCode, 500)
     };
     if (this.statusMessage) {
-      obj.statusMessage = sanitizeStatusMessage$1(this.statusMessage);
+      obj.statusMessage = sanitizeStatusMessage(this.statusMessage);
     }
     if (this.data !== void 0) {
       obj.data = this.data;
     }
     return obj;
   }
-};
-function createError$2(input) {
+}
+function createError$1(input) {
   if (typeof input === "string") {
-    return new H3Error$1(input);
+    return new H3Error(input);
   }
-  if (isError$1(input)) {
+  if (isError(input)) {
     return input;
   }
-  const err = new H3Error$1(input.message ?? input.statusMessage ?? "", {
+  const err = new H3Error(input.message ?? input.statusMessage ?? "", {
     cause: input.cause || input
   });
-  if (hasProp$1(input, "stack")) {
+  if (hasProp(input, "stack")) {
     try {
       Object.defineProperty(err, "stack", {
         get() {
@@ -903,9 +967,9 @@ function createError$2(input) {
     err.data = input.data;
   }
   if (input.statusCode) {
-    err.statusCode = sanitizeStatusCode$1(input.statusCode, err.statusCode);
+    err.statusCode = sanitizeStatusCode(input.statusCode, err.statusCode);
   } else if (input.status) {
-    err.statusCode = sanitizeStatusCode$1(input.status, err.statusCode);
+    err.statusCode = sanitizeStatusCode(input.status, err.statusCode);
   }
   if (input.statusMessage) {
     err.statusMessage = input.statusMessage;
@@ -914,7 +978,7 @@ function createError$2(input) {
   }
   if (err.statusMessage) {
     const originalMessage = err.statusMessage;
-    const sanitizedMessage = sanitizeStatusMessage$1(err.statusMessage);
+    const sanitizedMessage = sanitizeStatusMessage(err.statusMessage);
     if (sanitizedMessage !== originalMessage) {
       console.warn(
         "[h3] Please prefer using `message` for longer error messages instead of `statusMessage`. In the future, `statusMessage` will be sanitized by default."
@@ -933,7 +997,7 @@ function sendError(event, error, debug) {
   if (event.handled) {
     return;
   }
-  const h3Error = isError$1(error) ? error : createError$2(error);
+  const h3Error = isError(error) ? error : createError$1(error);
   const responseBody = {
     statusCode: h3Error.statusCode,
     statusMessage: h3Error.statusMessage,
@@ -951,7 +1015,7 @@ function sendError(event, error, debug) {
   event.node.res.setHeader("content-type", MIMES.json);
   event.node.res.end(JSON.stringify(responseBody, void 0, 2));
 }
-function isError$1(input) {
+function isError(input) {
   return input?.constructor?.__h3_error__ === true;
 }
 
@@ -1036,7 +1100,21 @@ function process$1(data, headers) {
 function getQuery(event) {
   return getQuery$1(event.path || "");
 }
-function isMethod$1(event, expected, allowHead) {
+function getRouterParams(event, opts = {}) {
+  let params = event.context.params || {};
+  if (opts.decode) {
+    params = { ...params };
+    for (const key in params) {
+      params[key] = decode$2(params[key]);
+    }
+  }
+  return params;
+}
+function getRouterParam(event, name, opts = {}) {
+  const params = getRouterParams(event, opts);
+  return params[name];
+}
+function isMethod(event, expected, allowHead) {
   if (typeof expected === "string") {
     if (event.method === expected) {
       return true;
@@ -1046,15 +1124,15 @@ function isMethod$1(event, expected, allowHead) {
   }
   return false;
 }
-function assertMethod$1(event, expected, allowHead) {
-  if (!isMethod$1(event, expected)) {
-    throw createError$2({
+function assertMethod(event, expected, allowHead) {
+  if (!isMethod(event, expected)) {
+    throw createError$1({
       statusCode: 405,
       statusMessage: "HTTP method is not allowed."
     });
   }
 }
-function getRequestHeaders$1(event) {
+function getRequestHeaders(event) {
   const _headers = {};
   for (const key in event.node.req.headers) {
     const val = event.node.req.headers[key];
@@ -1062,8 +1140,8 @@ function getRequestHeaders$1(event) {
   }
   return _headers;
 }
-function getRequestHeader$1(event, name) {
-  const headers = getRequestHeaders$1(event);
+function getRequestHeader(event, name) {
+  const headers = getRequestHeaders(event);
   const value = headers[name.toLowerCase()];
   return value;
 }
@@ -1093,12 +1171,12 @@ function getRequestURL(event, opts = {}) {
   return new URL(path, `${protocol}://${host}`);
 }
 
-const RawBodySymbol$1 = Symbol.for("h3RawBody");
-const ParsedBodySymbol$1 = Symbol.for("h3ParsedBody");
-const PayloadMethods$1$1 = ["PATCH", "POST", "PUT", "DELETE"];
-function readRawBody$1(event, encoding = "utf8") {
-  assertMethod$1(event, PayloadMethods$1$1);
-  const _rawBody = event._requestBody || event.web?.request?.body || event.node.req[RawBodySymbol$1] || event.node.req.rawBody || event.node.req.body;
+const RawBodySymbol = Symbol.for("h3RawBody");
+const ParsedBodySymbol = Symbol.for("h3ParsedBody");
+const PayloadMethods$1 = ["PATCH", "POST", "PUT", "DELETE"];
+function readRawBody(event, encoding = "utf8") {
+  assertMethod(event, PayloadMethods$1);
+  const _rawBody = event._requestBody || event.web?.request?.body || event.node.req[RawBodySymbol] || event.node.req.rawBody || event.node.req.body;
   if (_rawBody) {
     const promise2 = Promise.resolve(_rawBody).then((_resolved) => {
       if (Buffer.isBuffer(_resolved)) {
@@ -1149,7 +1227,7 @@ function readRawBody$1(event, encoding = "utf8") {
   )) {
     return Promise.resolve(void 0);
   }
-  const promise = event.node.req[RawBodySymbol$1] = new Promise(
+  const promise = event.node.req[RawBodySymbol] = new Promise(
     (resolve, reject) => {
       const bodyData = [];
       event.node.req.on("error", (err) => {
@@ -1164,28 +1242,28 @@ function readRawBody$1(event, encoding = "utf8") {
   const result = encoding ? promise.then((buff) => buff.toString(encoding)) : promise;
   return result;
 }
-async function readBody$1(event, options = {}) {
+async function readBody(event, options = {}) {
   const request = event.node.req;
-  if (hasProp$1(request, ParsedBodySymbol$1)) {
-    return request[ParsedBodySymbol$1];
+  if (hasProp(request, ParsedBodySymbol)) {
+    return request[ParsedBodySymbol];
   }
   const contentType = request.headers["content-type"] || "";
-  const body = await readRawBody$1(event);
+  const body = await readRawBody(event);
   let parsed;
   if (contentType === "application/json") {
-    parsed = _parseJSON$1(body, options.strict ?? true);
+    parsed = _parseJSON(body, options.strict ?? true);
   } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-    parsed = _parseURLEncodedBody$1(body);
+    parsed = _parseURLEncodedBody(body);
   } else if (contentType.startsWith("text/")) {
     parsed = body;
   } else {
-    parsed = _parseJSON$1(body, options.strict ?? false);
+    parsed = _parseJSON(body, options.strict ?? false);
   }
-  request[ParsedBodySymbol$1] = parsed;
+  request[ParsedBodySymbol] = parsed;
   return parsed;
 }
 async function readMultipartFormData(event) {
-  const contentType = getRequestHeader$1(event, "content-type");
+  const contentType = getRequestHeader(event, "content-type");
   if (!contentType || !contentType.startsWith("multipart/form-data")) {
     return;
   }
@@ -1193,25 +1271,25 @@ async function readMultipartFormData(event) {
   if (!boundary) {
     return;
   }
-  const body = await readRawBody$1(event, false);
+  const body = await readRawBody(event, false);
   if (!body) {
     return;
   }
   return parse$1(body, boundary);
 }
 function getRequestWebStream(event) {
-  if (!PayloadMethods$1$1.includes(event.method)) {
+  if (!PayloadMethods$1.includes(event.method)) {
     return;
   }
   const bodyStream = event.web?.request?.body || event._requestBody;
   if (bodyStream) {
     return bodyStream;
   }
-  const _hasRawBody = RawBodySymbol$1 in event.node.req || "rawBody" in event.node.req || "body" in event.node.req || "__unenv__" in event.node.req;
+  const _hasRawBody = RawBodySymbol in event.node.req || "rawBody" in event.node.req || "body" in event.node.req || "__unenv__" in event.node.req;
   if (_hasRawBody) {
     return new ReadableStream({
       async start(controller) {
-        const _rawBody = await readRawBody$1(event, false);
+        const _rawBody = await readRawBody(event, false);
         if (_rawBody) {
           controller.enqueue(_rawBody);
         }
@@ -1233,25 +1311,25 @@ function getRequestWebStream(event) {
     }
   });
 }
-function _parseJSON$1(body = "", strict) {
+function _parseJSON(body = "", strict) {
   if (!body) {
     return void 0;
   }
   try {
-    return destr$1(body, { strict });
+    return destr(body, { strict });
   } catch {
-    throw createError$2({
+    throw createError$1({
       statusCode: 400,
       statusMessage: "Bad Request",
       message: "Invalid JSON body"
     });
   }
 }
-function _parseURLEncodedBody$1(body) {
+function _parseURLEncodedBody(body) {
   const form = new URLSearchParams(body);
   const parsedForm = /* @__PURE__ */ Object.create(null);
   for (const [key, value] of form.entries()) {
-    if (hasProp$1(parsedForm, key)) {
+    if (hasProp(parsedForm, key)) {
       if (!Array.isArray(parsedForm[key])) {
         parsedForm[key] = [parsedForm[key]];
       }
@@ -1300,11 +1378,11 @@ const MIMES = {
   json: "application/json"
 };
 
-const DISALLOWED_STATUS_CHARS$1 = /[^\u0009\u0020-\u007E]/g;
-function sanitizeStatusMessage$1(statusMessage = "") {
-  return statusMessage.replace(DISALLOWED_STATUS_CHARS$1, "");
+const DISALLOWED_STATUS_CHARS = /[^\u0009\u0020-\u007E]/g;
+function sanitizeStatusMessage(statusMessage = "") {
+  return statusMessage.replace(DISALLOWED_STATUS_CHARS, "");
 }
-function sanitizeStatusCode$1(statusCode, defaultStatusCode = 200) {
+function sanitizeStatusCode(statusCode, defaultStatusCode = 200) {
   if (!statusCode) {
     return defaultStatusCode;
   }
@@ -1317,33 +1395,33 @@ function sanitizeStatusCode$1(statusCode, defaultStatusCode = 200) {
   return statusCode;
 }
 
-function getDistinctCookieKey$1(name, opts) {
+function getDistinctCookieKey(name, opts) {
   return [name, opts.domain || "", opts.path || "/"].join(";");
 }
 
-function parseCookies$1(event) {
+function parseCookies(event) {
   return parse$2(event.node.req.headers.cookie || "");
 }
-function getCookie$1(event, name) {
-  return parseCookies$1(event)[name];
+function getCookie(event, name) {
+  return parseCookies(event)[name];
 }
-function setCookie$1(event, name, value, serializeOptions = {}) {
+function setCookie(event, name, value, serializeOptions = {}) {
   if (!serializeOptions.path) {
     serializeOptions = { path: "/", ...serializeOptions };
   }
   const newCookie = serialize$2(name, value, serializeOptions);
-  const currentCookies = splitCookiesString$1(
+  const currentCookies = splitCookiesString(
     event.node.res.getHeader("set-cookie")
   );
   if (currentCookies.length === 0) {
     event.node.res.setHeader("set-cookie", newCookie);
     return;
   }
-  const newCookieKey = getDistinctCookieKey$1(name, serializeOptions);
+  const newCookieKey = getDistinctCookieKey(name, serializeOptions);
   event.node.res.removeHeader("set-cookie");
   for (const cookie of currentCookies) {
-    const parsed = parseSetCookie$1(cookie);
-    const key = getDistinctCookieKey$1(parsed.name, parsed);
+    const parsed = parseSetCookie(cookie);
+    const key = getDistinctCookieKey(parsed.name, parsed);
     if (key === newCookieKey) {
       continue;
     }
@@ -1351,9 +1429,15 @@ function setCookie$1(event, name, value, serializeOptions = {}) {
   }
   event.node.res.appendHeader("set-cookie", newCookie);
 }
-function splitCookiesString$1(cookiesString) {
+function deleteCookie(event, name, serializeOptions) {
+  setCookie(event, name, "", {
+    ...serializeOptions,
+    maxAge: 0
+  });
+}
+function splitCookiesString(cookiesString) {
   if (Array.isArray(cookiesString)) {
-    return cookiesString.flatMap((c) => splitCookiesString$1(c));
+    return cookiesString.flatMap((c) => splitCookiesString(c));
   }
   if (typeof cookiesString !== "string") {
     return [];
@@ -1428,7 +1512,7 @@ function sendNoContent(event, code) {
   if (!code && event.node.res.statusCode !== 200) {
     code = event.node.res.statusCode;
   }
-  const _code = sanitizeStatusCode$1(code, 204);
+  const _code = sanitizeStatusCode(code, 204);
   if (_code === 204) {
     event.node.res.removeHeader("content-length");
   }
@@ -1437,13 +1521,13 @@ function sendNoContent(event, code) {
 }
 function setResponseStatus(event, code, text) {
   if (code) {
-    event.node.res.statusCode = sanitizeStatusCode$1(
+    event.node.res.statusCode = sanitizeStatusCode(
       code,
       event.node.res.statusCode
     );
   }
   if (text) {
-    event.node.res.statusMessage = sanitizeStatusMessage$1(text);
+    event.node.res.statusMessage = sanitizeStatusMessage(text);
   }
 }
 function getResponseStatus(event) {
@@ -1458,7 +1542,7 @@ function defaultContentType(event, type) {
   }
 }
 function sendRedirect(event, location, code = 302) {
-  event.node.res.statusCode = sanitizeStatusCode$1(
+  event.node.res.statusCode = sanitizeStatusCode(
     code,
     event.node.res.statusCode
   );
@@ -1479,9 +1563,10 @@ function setResponseHeaders(event, headers) {
   }
 }
 const setHeaders = setResponseHeaders;
-function setResponseHeader$1(event, name, value) {
+function setResponseHeader(event, name, value) {
   event.node.res.setHeader(name, value);
 }
+const setHeader = setResponseHeader;
 function appendResponseHeader(event, name, value) {
   let current = event.node.res.getHeader(name);
   if (!current) {
@@ -1522,7 +1607,7 @@ function sendStream(event, stream) {
     event._handled = true;
     return Promise.resolve();
   }
-  if (hasProp$1(stream, "pipeTo") && typeof stream.pipeTo === "function") {
+  if (hasProp(stream, "pipeTo") && typeof stream.pipeTo === "function") {
     return stream.pipeTo(
       new WritableStream({
         write(chunk) {
@@ -1533,7 +1618,7 @@ function sendStream(event, stream) {
       event.node.res.end();
     });
   }
-  if (hasProp$1(stream, "pipe") && typeof stream.pipe === "function") {
+  if (hasProp(stream, "pipe") && typeof stream.pipe === "function") {
     return new Promise((resolve, reject) => {
       stream.pipe(event.node.res);
       if (stream.on) {
@@ -1557,19 +1642,19 @@ function sendStream(event, stream) {
 function sendWebResponse(event, response) {
   for (const [key, value] of response.headers) {
     if (key === "set-cookie") {
-      event.node.res.appendHeader(key, splitCookiesString$1(value));
+      event.node.res.appendHeader(key, splitCookiesString(value));
     } else {
       event.node.res.setHeader(key, value);
     }
   }
   if (response.status) {
-    event.node.res.statusCode = sanitizeStatusCode$1(
+    event.node.res.statusCode = sanitizeStatusCode(
       response.status,
       event.node.res.statusCode
     );
   }
   if (response.statusText) {
-    event.node.res.statusMessage = sanitizeStatusMessage$1(response.statusText);
+    event.node.res.statusMessage = sanitizeStatusMessage(response.statusText);
   }
   if (response.redirected) {
     event.node.res.setHeader("location", response.url);
@@ -1600,7 +1685,7 @@ async function proxyRequest(event, target, opts = {}) {
       body = getRequestWebStream(event);
       duplex = "half";
     } else {
-      body = await readRawBody$1(event, false).catch(() => void 0);
+      body = await readRawBody(event, false).catch(() => void 0);
     }
   }
   const method = opts.fetchOptions?.method || event.method;
@@ -1630,17 +1715,17 @@ async function sendProxy(event, target, opts = {}) {
       ...opts.fetchOptions
     });
   } catch (error) {
-    throw createError$2({
+    throw createError$1({
       status: 502,
       statusMessage: "Bad Gateway",
       cause: error
     });
   }
-  event.node.res.statusCode = sanitizeStatusCode$1(
+  event.node.res.statusCode = sanitizeStatusCode(
     response.status,
     event.node.res.statusCode
   );
-  event.node.res.statusMessage = sanitizeStatusMessage$1(response.statusText);
+  event.node.res.statusMessage = sanitizeStatusMessage(response.statusText);
   const cookies = [];
   for (const [key, value] of response.headers.entries()) {
     if (key === "content-encoding") {
@@ -1650,7 +1735,7 @@ async function sendProxy(event, target, opts = {}) {
       continue;
     }
     if (key === "set-cookie") {
-      cookies.push(...splitCookiesString$1(value));
+      cookies.push(...splitCookiesString(value));
       continue;
     }
     event.node.res.setHeader(key, value);
@@ -1699,7 +1784,7 @@ async function sendProxy(event, target, opts = {}) {
 }
 function getProxyRequestHeaders(event, opts) {
   const headers = /* @__PURE__ */ Object.create(null);
-  const reqHeaders = getRequestHeaders$1(event);
+  const reqHeaders = getRequestHeaders(event);
   for (const name in reqHeaders) {
     if (!ignoredHeaders.has(name) || name === "host" && opts?.host) {
       headers[name] = reqHeaders[name];
@@ -1829,7 +1914,7 @@ class H3Event {
   }
 }
 function isEvent(input) {
-  return hasProp$1(input, "__is_event__");
+  return hasProp(input, "__is_event__");
 }
 function createEvent(req, res) {
   return new H3Event(req, res);
@@ -1848,27 +1933,27 @@ function _normalizeNodeHeaders(nodeHeaders) {
   return headers;
 }
 
-function defineEventHandler$1(handler) {
+function defineEventHandler(handler) {
   if (typeof handler === "function") {
     handler.__is_handler__ = true;
     return handler;
   }
   const _hooks = {
-    onRequest: _normalizeArray$1(handler.onRequest),
-    onBeforeResponse: _normalizeArray$1(handler.onBeforeResponse)
+    onRequest: _normalizeArray(handler.onRequest),
+    onBeforeResponse: _normalizeArray(handler.onBeforeResponse)
   };
   const _handler = (event) => {
-    return _callHandler$1(event, handler.handler, _hooks);
+    return _callHandler(event, handler.handler, _hooks);
   };
   _handler.__is_handler__ = true;
   _handler.__resolve__ = handler.handler.__resolve__;
   _handler.__websocket__ = handler.websocket;
   return _handler;
 }
-function _normalizeArray$1(input) {
+function _normalizeArray(input) {
   return input ? Array.isArray(input) ? input : [input] : void 0;
 }
-async function _callHandler$1(event, handler, hooks) {
+async function _callHandler(event, handler, hooks) {
   if (hooks.onRequest) {
     for (const hook of hooks.onRequest) {
       await hook(event);
@@ -1886,12 +1971,12 @@ async function _callHandler$1(event, handler, hooks) {
   }
   return response.body;
 }
-const eventHandler$1 = defineEventHandler$1;
-function isEventHandler$1(input) {
-  return hasProp$1(input, "__is_handler__");
+const eventHandler = defineEventHandler;
+function isEventHandler(input) {
+  return hasProp(input, "__is_handler__");
 }
-function toEventHandler$1(input, _, _route) {
-  if (!isEventHandler$1(input)) {
+function toEventHandler(input, _, _route) {
+  if (!isEventHandler(input)) {
     console.warn(
       "[h3] Implicit event handler conversion is deprecated. Use `eventHandler()` or `fromNodeMiddleware()` to define event handlers.",
       _route && _route !== "/" ? `
@@ -1902,7 +1987,7 @@ function toEventHandler$1(input, _, _route) {
   }
   return input;
 }
-function defineLazyEventHandler$1(factory) {
+function defineLazyEventHandler(factory) {
   let _promise;
   let _resolved;
   const resolveHandler = () => {
@@ -1918,13 +2003,13 @@ function defineLazyEventHandler$1(factory) {
             handler2
           );
         }
-        _resolved = { handler: toEventHandler$1(r.default || r) };
+        _resolved = { handler: toEventHandler(r.default || r) };
         return _resolved;
       });
     }
     return _promise;
   };
-  const handler = eventHandler$1((event) => {
+  const handler = eventHandler((event) => {
     if (_resolved) {
       return _resolved.handler(event);
     }
@@ -1933,7 +2018,7 @@ function defineLazyEventHandler$1(factory) {
   handler.__resolve__ = resolveHandler;
   return handler;
 }
-const lazyEventHandler$1 = defineLazyEventHandler$1;
+const lazyEventHandler = defineLazyEventHandler;
 
 function createApp(options = {}) {
   const stack = [];
@@ -1976,7 +2061,7 @@ function use(app, arg1, arg2, arg3) {
 }
 function createAppEventHandler(stack, options) {
   const spacing = options.debug ? 2 : void 0;
-  return eventHandler$1(async (event) => {
+  return eventHandler(async (event) => {
     event.node.req.originalUrl = event.node.req.originalUrl || event.node.req.url || "/";
     const _reqPath = event._path || event.node.req.url || "/";
     let _layerPath;
@@ -2021,7 +2106,7 @@ function createAppEventHandler(stack, options) {
       }
     }
     if (!event.handled) {
-      throw createError$2({
+      throw createError$1({
         statusCode: 404,
         statusMessage: `Cannot find any path matching ${event.path || "/"}.`
       });
@@ -2055,7 +2140,7 @@ function createResolver(stack) {
         res = {
           ...res,
           ..._res,
-          route: joinURL$1(res.route || "/", _res.route || "/")
+          route: joinURL(res.route || "/", _res.route || "/")
         };
       }
       return res;
@@ -2068,12 +2153,12 @@ function normalizeLayer(input) {
     handler = handler.handler;
   }
   if (input.lazy) {
-    handler = lazyEventHandler$1(handler);
-  } else if (!isEventHandler$1(handler)) {
-    handler = toEventHandler$1(handler, void 0, input.route);
+    handler = lazyEventHandler(handler);
+  } else if (!isEventHandler(handler)) {
+    handler = toEventHandler(handler, void 0, input.route);
   }
   return {
-    route: withoutTrailingSlash$1(input.route),
+    route: withoutTrailingSlash(input.route),
     match: input.match,
     handler
   };
@@ -2098,7 +2183,7 @@ function handleHandlerResponse(event, val, jsonSpace) {
       });
     }
     if (val instanceof Error) {
-      throw createError$2(val);
+      throw createError$1(val);
     }
     if (typeof val.end === "function") {
       return true;
@@ -2114,7 +2199,7 @@ function handleHandlerResponse(event, val, jsonSpace) {
   if (valType === "bigint") {
     return send(event, val.toString(), MIMES.json);
   }
-  throw createError$2({
+  throw createError$1({
     statusCode: 500,
     statusMessage: `[h3] Cannot send ${valType} as response.`
   });
@@ -2133,7 +2218,7 @@ function websocketOptions(evResolver, appOptions) {
     ...appOptions.websocket,
     async resolve(info) {
       const url = info.request?.url || info.url || "/";
-      const { pathname } = typeof url === "string" ? parseURL$1(url) : url;
+      const { pathname } = typeof url === "string" ? parseURL(url) : url;
       const resolved = await evResolver(pathname);
       return resolved?.handler?.__websocket__ || {};
     }
@@ -2167,7 +2252,7 @@ function createRouter(opts = {}) {
         addRoute(path, handler, m);
       }
     } else {
-      route.handlers[method] = toEventHandler$1(handler, void 0, path);
+      route.handlers[method] = toEventHandler(handler, void 0, path);
     }
     return router;
   };
@@ -2183,7 +2268,7 @@ function createRouter(opts = {}) {
     const matched = _router.lookup(path);
     if (!matched || !matched.handlers) {
       return {
-        error: createError$2({
+        error: createError$1({
           statusCode: 404,
           name: "Not Found",
           statusMessage: `Cannot find any route matching ${path || "/"}.`
@@ -2211,7 +2296,7 @@ function createRouter(opts = {}) {
     }
     if (!handler) {
       return {
-        error: createError$2({
+        error: createError$1({
           statusCode: 405,
           name: "Method Not Allowed",
           statusMessage: `Method ${method} is not allowed on this route.`
@@ -2221,7 +2306,7 @@ function createRouter(opts = {}) {
     return { matched, handler };
   };
   const isPreemptive = opts.preemptive || opts.preemtive;
-  router.handler = eventHandler$1((event) => {
+  router.handler = eventHandler((event) => {
     const match = matchHandler(
       event.path,
       event.method.toLowerCase()
@@ -2244,7 +2329,7 @@ function createRouter(opts = {}) {
     });
   });
   router.handler.__resolve__ = async (path) => {
-    path = withLeadingSlash$1(path);
+    path = withLeadingSlash(path);
     const match = matchHandler(path);
     if ("error" in match) {
       return;
@@ -2270,8 +2355,8 @@ function toNodeListener(app) {
     try {
       await app.handler(event);
     } catch (_error) {
-      const error = createError$2(_error);
-      if (!isError$1(_error)) {
+      const error = createError$1(_error);
+      if (!isError(_error)) {
         error.unhandled = true;
       }
       setResponseStatus(event, error.statusCode, error.statusMessage);
@@ -2725,7 +2810,7 @@ function createFetch(globalOptions = {}) {
         context.request = withBase(context.request, context.options.baseURL);
       }
       if (context.options.query) {
-        context.request = withQuery$1(context.request, context.options.query);
+        context.request = withQuery(context.request, context.options.query);
         delete context.options.query;
       }
       if ("query" in context.options) {
@@ -2800,7 +2885,7 @@ function createFetch(globalOptions = {}) {
       switch (responseType) {
         case "json": {
           const data = await context.response.text();
-          const parseFunction = context.options.parseResponse || destr$1;
+          const parseFunction = context.options.parseResponse || destr;
           context.response._data = parseFunction(data);
           break;
         }
@@ -3169,7 +3254,7 @@ function createStorage(options = {}) {
       key = normalizeKey$1(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.getItem, relativeKey, opts).then(
-        (value) => destr$1(value)
+        (value) => destr(value)
       );
     },
     getItems(items, commonOptions = {}) {
@@ -3185,7 +3270,7 @@ function createStorage(options = {}) {
           ).then(
             (r) => r.map((item) => ({
               key: joinKeys(batch.base, item.key),
-              value: destr$1(item.value)
+              value: destr(item.value)
             }))
           );
         }
@@ -3197,7 +3282,7 @@ function createStorage(options = {}) {
               item.options
             ).then((value) => ({
               key: item.key,
-              value: destr$1(value)
+              value: destr(value)
             }));
           })
         );
@@ -3305,7 +3390,7 @@ function createStorage(options = {}) {
           driver.getItem,
           relativeKey + "$",
           opts
-        ).then((value_) => destr$1(value_));
+        ).then((value_) => destr(value_));
         if (value && typeof value === "object") {
           if (typeof value.atime === "string") {
             value.atime = new Date(value.atime);
@@ -3495,21 +3580,21 @@ const assets = {
 function defineDriver(factory) {
   return factory;
 }
-function createError$1(driver, message, opts) {
+function createError(driver, message, opts) {
   const err = new Error(`[unstorage] [${driver}] ${message}`, opts);
   if (Error.captureStackTrace) {
-    Error.captureStackTrace(err, createError$1);
+    Error.captureStackTrace(err, createError);
   }
   return err;
 }
 function createRequiredError(driver, name) {
   if (Array.isArray(name)) {
-    return createError$1(
+    return createError(
       driver,
       `Missing some of the required options ${name.map((n) => "`" + n + "`").join(", ")}`
     );
   }
-  return createError$1(driver, `Missing required option \`${name}\`.`);
+  return createError(driver, `Missing required option \`${name}\`.`);
 }
 
 function ignoreNotfound(err) {
@@ -3588,7 +3673,7 @@ const unstorage_47drivers_47fs_45lite = defineDriver((opts = {}) => {
   opts.base = resolve(opts.base);
   const r = (key) => {
     if (PATH_TRAVERSE_RE.test(key)) {
-      throw createError$1(
+      throw createError(
         DRIVER_NAME,
         `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
       );
@@ -3655,7 +3740,23 @@ function useStorage(base = "") {
   return base ? prefixStorage(storage, base) : storage;
 }
 
+function serialize$1(o){return typeof o=="string"?`'${o}'`:new c().serialize(o)}const c=/*@__PURE__*/function(){class o{#t=new Map;compare(t,r){const e=typeof t,n=typeof r;return e==="string"&&n==="string"?t.localeCompare(r):e==="number"&&n==="number"?t-r:String.prototype.localeCompare.call(this.serialize(t,true),this.serialize(r,true))}serialize(t,r){if(t===null)return "null";switch(typeof t){case "string":return r?t:`'${t}'`;case "bigint":return `${t}n`;case "object":return this.$object(t);case "function":return this.$function(t)}return String(t)}serializeObject(t){const r=Object.prototype.toString.call(t);if(r!=="[object Object]")return this.serializeBuiltInType(r.length<10?`unknown:${r}`:r.slice(8,-1),t);const e=t.constructor,n=e===Object||e===void 0?"":e.name;if(n!==""&&globalThis[n]===e)return this.serializeBuiltInType(n,t);if(typeof t.toJSON=="function"){const i=t.toJSON();return n+(i!==null&&typeof i=="object"?this.$object(i):`(${this.serialize(i)})`)}return this.serializeObjectEntries(n,Object.entries(t))}serializeBuiltInType(t,r){const e=this["$"+t];if(e)return e.call(this,r);if(typeof r?.entries=="function")return this.serializeObjectEntries(t,r.entries());throw new Error(`Cannot serialize ${t}`)}serializeObjectEntries(t,r){const e=Array.from(r).sort((i,a)=>this.compare(i[0],a[0]));let n=`${t}{`;for(let i=0;i<e.length;i++){const[a,l]=e[i];n+=`${this.serialize(a,true)}:${this.serialize(l)}`,i<e.length-1&&(n+=",");}return n+"}"}$object(t){let r=this.#t.get(t);return r===void 0&&(this.#t.set(t,`#${this.#t.size}`),r=this.serializeObject(t),this.#t.set(t,r)),r}$function(t){const r=Function.prototype.toString.call(t);return r.slice(-15)==="[native code] }"?`${t.name||""}()[native]`:`${t.name}(${t.length})${r.replace(/\s*\n\s*/g,"")}`}$Array(t){let r="[";for(let e=0;e<t.length;e++)r+=this.serialize(t[e]),e<t.length-1&&(r+=",");return r+"]"}$Date(t){try{return `Date(${t.toISOString()})`}catch{return "Date(null)"}}$ArrayBuffer(t){return `ArrayBuffer[${new Uint8Array(t).join(",")}]`}$Set(t){return `Set${this.$Array(Array.from(t).sort((r,e)=>this.compare(r,e)))}`}$Map(t){return this.serializeObjectEntries("Map",t.entries())}}for(const s of ["Error","RegExp","URL"])o.prototype["$"+s]=function(t){return `${s}(${t})`};for(const s of ["Int8Array","Uint8Array","Uint8ClampedArray","Int16Array","Uint16Array","Int32Array","Uint32Array","Float32Array","Float64Array"])o.prototype["$"+s]=function(t){return `${s}[${t.join(",")}]`};for(const s of ["BigInt64Array","BigUint64Array"])o.prototype["$"+s]=function(t){return `${s}[${t.join("n,")}${t.length>0?"n":""}]`};return o}();
+
+function isEqual(object1, object2) {
+  if (object1 === object2) {
+    return true;
+  }
+  if (serialize$1(object1) === serialize$1(object2)) {
+    return true;
+  }
+  return false;
+}
+
 const e=globalThis.process?.getBuiltinModule?.("crypto")?.hash,r="sha256",s="base64url";function digest(t){if(e)return e(r,t,s);const o=createHash(r).update(t);return globalThis.process?.versions?.webcontainer?o.digest().toString(s):o.digest(s)}
+
+function hash$1(input) {
+  return digest(serialize$1(input));
+}
 
 const Hasher = /* @__PURE__ */ (() => {
   class Hasher2 {
@@ -3831,13 +3932,13 @@ const Hasher = /* @__PURE__ */ (() => {
   }
   return Hasher2;
 })();
-function serialize$1(object) {
+function serialize(object) {
   const hasher = new Hasher();
   hasher.dispatch(object);
   return hasher.buff;
 }
 function hash(value) {
-  return digest(typeof value === "string" ? value : serialize$1(value)).replace(/[-_]/g, "").slice(0, 10);
+  return digest(typeof value === "string" ? value : serialize(value)).replace(/[-_]/g, "").slice(0, 10);
 }
 
 function defaultCacheOptions() {
@@ -3966,7 +4067,7 @@ function defineCachedEventHandler(handler, opts = defaultCacheOptions()) {
       const _path = event.node.req.originalUrl || event.node.req.url || event.path;
       let _pathname;
       try {
-        _pathname = escapeKey(decodeURI(parseURL$1(_path).pathname)).slice(0, 16) || "index";
+        _pathname = escapeKey(decodeURI(parseURL(_path).pathname)).slice(0, 16) || "index";
       } catch {
         _pathname = "-";
       }
@@ -4119,7 +4220,7 @@ function defineCachedEventHandler(handler, opts = defaultCacheOptions()) {
     },
     _opts
   );
-  return defineEventHandler$1(async (event) => {
+  return defineEventHandler(async (event) => {
     if (opts.headersOnly) {
       if (handleCacheHeaders(event, { maxAge: opts.maxAge })) {
         return;
@@ -4145,7 +4246,7 @@ function defineCachedEventHandler(handler, opts = defaultCacheOptions()) {
       if (name === "set-cookie") {
         event.node.res.appendHeader(
           name,
-          splitCookiesString$1(value)
+          splitCookiesString(value)
         );
       } else {
         if (value !== void 0) {
@@ -4265,16 +4366,16 @@ const inlineAppConfig = {
 
 const appConfig = defuFn(inlineAppConfig);
 
-const NUMBER_CHAR_RE$1 = /\d/;
-const STR_SPLITTERS$1 = ["-", "_", "/", "."];
-function isUppercase$1(char = "") {
-  if (NUMBER_CHAR_RE$1.test(char)) {
+const NUMBER_CHAR_RE = /\d/;
+const STR_SPLITTERS = ["-", "_", "/", "."];
+function isUppercase(char = "") {
+  if (NUMBER_CHAR_RE.test(char)) {
     return void 0;
   }
   return char !== char.toLowerCase();
 }
-function splitByCase$1(str, separators) {
-  const splitters = STR_SPLITTERS$1;
+function splitByCase(str, separators) {
+  const splitters = STR_SPLITTERS;
   const parts = [];
   if (!str || typeof str !== "string") {
     return parts;
@@ -4290,7 +4391,7 @@ function splitByCase$1(str, separators) {
       previousUpper = void 0;
       continue;
     }
-    const isUpper = isUppercase$1(char);
+    const isUpper = isUppercase(char);
     if (previousSplitter === false) {
       if (previousUpper === false && isUpper === true) {
         parts.push(buff);
@@ -4313,16 +4414,22 @@ function splitByCase$1(str, separators) {
   parts.push(buff);
   return parts;
 }
-function kebabCase$1(str, joiner) {
-  return str ? (Array.isArray(str) ? str : splitByCase$1(str)).map((p) => p.toLowerCase()).join(joiner) : "";
+function upperFirst(str) {
+  return str ? str[0].toUpperCase() + str.slice(1) : "";
+}
+function pascalCase(str, opts) {
+  return str ? (Array.isArray(str) ? str : splitByCase(str)).map((p) => upperFirst(p)).join("") : "";
+}
+function kebabCase(str, joiner) {
+  return str ? (Array.isArray(str) ? str : splitByCase(str)).map((p) => p.toLowerCase()).join(joiner ?? "-") : "";
 }
 function snakeCase(str) {
-  return kebabCase$1(str || "", "_");
+  return kebabCase(str || "", "_");
 }
 
 function getEnv(key, opts) {
   const envKey = snakeCase(key).toUpperCase();
-  return destr$1(
+  return destr(
     process.env[opts.prefix + envKey] ?? process.env[opts.altPrefix + envKey]
   );
 }
@@ -4361,7 +4468,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "b308be03-500f-4b3d-8630-d2c8e2a2082c",
+    "buildId": "29803225-1aa1-420d-acbf-81f14669ed30",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -4464,7 +4571,9 @@ const _inlineRuntimeConfig = {
       "dir": "../../static"
     },
     "http": {
-      "domains": []
+      "domains": [
+        "api.dicebear.com"
+      ]
     }
   }
 };
@@ -4640,7 +4749,7 @@ const _routeRulesMatcher = toRouteMatcher(
   createRouter$1({ routes: config.nitro.routeRules })
 );
 function createRouteRulesHandler(ctx) {
-  return eventHandler$1((event) => {
+  return eventHandler((event) => {
     const routeRules = getRouteRules(event);
     if (routeRules.headers) {
       setHeaders(event, routeRules.headers);
@@ -4651,12 +4760,12 @@ function createRouteRulesHandler(ctx) {
         let targetPath = event.path;
         const strpBase = routeRules.redirect._redirectStripBase;
         if (strpBase) {
-          targetPath = withoutBase$1(targetPath, strpBase);
+          targetPath = withoutBase(targetPath, strpBase);
         }
-        target = joinURL$1(target.slice(0, -3), targetPath);
+        target = joinURL(target.slice(0, -3), targetPath);
       } else if (event.path.includes("?")) {
         const query = getQuery$1(event.path);
-        target = withQuery$1(target, query);
+        target = withQuery(target, query);
       }
       return sendRedirect(event, target, routeRules.redirect.statusCode);
     }
@@ -4666,12 +4775,12 @@ function createRouteRulesHandler(ctx) {
         let targetPath = event.path;
         const strpBase = routeRules.proxy._proxyStripBase;
         if (strpBase) {
-          targetPath = withoutBase$1(targetPath, strpBase);
+          targetPath = withoutBase(targetPath, strpBase);
         }
-        target = joinURL$1(target.slice(0, -3), targetPath);
+        target = joinURL(target.slice(0, -3), targetPath);
       } else if (event.path.includes("?")) {
         const query = getQuery$1(event.path);
-        target = withQuery$1(target, query);
+        target = withQuery(target, query);
       }
       return proxyRequest(event, target, {
         fetch: ctx.localFetch,
@@ -4684,13 +4793,13 @@ function getRouteRules(event) {
   event.context._nitro = event.context._nitro || {};
   if (!event.context._nitro.routeRules) {
     event.context._nitro.routeRules = getRouteRulesForPath(
-      withoutBase$1(event.path.split("?")[0], useRuntimeConfig().app.baseURL)
+      withoutBase(event.path.split("?")[0], useRuntimeConfig().app.baseURL)
     );
   }
   return event.context._nitro.routeRules;
 }
 function getRouteRulesForPath(path) {
-  return defu$1({}, ..._routeRulesMatcher.matchAll(path).reverse());
+  return defu({}, ..._routeRulesMatcher.matchAll(path).reverse());
 }
 
 function joinHeaders(value) {
@@ -4707,7 +4816,7 @@ function normalizeFetchResponse(response) {
   });
 }
 function normalizeCookieHeader(header = "") {
-  return splitCookiesString$1(joinHeaders(header));
+  return splitCookiesString(joinHeaders(header));
 }
 function normalizeCookieHeaders(headers) {
   const outgoingHeaders = new Headers();
@@ -4734,7 +4843,7 @@ function isJsonRequest(event) {
 	return hasReqHeader(event, "accept", "application/json") || hasReqHeader(event, "user-agent", "curl/") || hasReqHeader(event, "user-agent", "httpie/") || hasReqHeader(event, "sec-fetch-mode", "cors") || event.path.startsWith("/api/") || event.path.endsWith(".json");
 }
 function hasReqHeader(event, name, includes) {
-	const value = getRequestHeader$1(event, name);
+	const value = getRequestHeader(event, name);
 	return value && typeof value === "string" && value.toLowerCase().includes(includes);
 }
 
@@ -4755,7 +4864,7 @@ const errorHandler$0 = (async function errorhandler(error, event, { defaultHandl
 	const errorObject = defaultRes.body;
 	// remove proto/hostname/port from URL
 	const url = new URL(errorObject.url);
-	errorObject.url = withoutBase$1(url.pathname, useRuntimeConfig(event).app.baseURL) + url.search + url.hash;
+	errorObject.url = withoutBase(url.pathname, useRuntimeConfig(event).app.baseURL) + url.search + url.hash;
 	// add default server message (keep sanitized for unhandled errors)
 	errorObject.message = error.unhandled ? errorObject.message || "Server Error" : error.message || errorObject.message || "Server Error";
 	// we will be rendering this error internally so we can pass along the error.data safely
@@ -4765,11 +4874,11 @@ const errorHandler$0 = (async function errorhandler(error, event, { defaultHandl
 	delete defaultRes.headers["content-security-policy"];
 	setResponseHeaders(event, defaultRes.headers);
 	// Access request headers
-	const reqHeaders = getRequestHeaders$1(event);
+	const reqHeaders = getRequestHeaders(event);
 	// Detect to avoid recursion in SSR rendering of errors
 	const isRenderingError = event.path.startsWith("/__nuxt_error") || !!reqHeaders["x-nuxt-error"];
 	// HTML response (via SSR)
-	const res = isRenderingError ? null : await useNitroApp().localFetch(withQuery$1(joinURL$1(useRuntimeConfig(event).app.baseURL, "/__nuxt_error"), errorObject), {
+	const res = isRenderingError ? null : await useNitroApp().localFetch(withQuery(joinURL(useRuntimeConfig(event).app.baseURL, "/__nuxt_error"), errorObject), {
 		headers: {
 			...reqHeaders,
 			"x-nuxt-error": "true"
@@ -4782,7 +4891,7 @@ const errorHandler$0 = (async function errorhandler(error, event, { defaultHandl
 	// Fallback to static rendered error page
 	if (!res) {
 		const { template } = await import('../_/error-500.mjs');
-		setResponseHeader$1(event, "Content-Type", "text/html;charset=UTF-8");
+		setResponseHeader(event, "Content-Type", "text/html;charset=UTF-8");
 		return send(event, template(errorObject));
 	}
 	const html = await res.text();
@@ -4791,7 +4900,7 @@ const errorHandler$0 = (async function errorhandler(error, event, { defaultHandl
 			appendResponseHeader(event, header, value);
 			continue;
 		}
-		setResponseHeader$1(event, header, value);
+		setResponseHeader(event, header, value);
 	}
 	setResponseStatus(event, res.status && res.status !== 200 ? res.status : defaultRes.status, res.statusText || defaultRes.statusText);
 	return send(event, html);
@@ -4891,1070 +5000,9 @@ const plugins = [
   _oFlbvvczkCPY_vWOGAQzGdRj_PHyeE9puRc3zVrPSQw
 ];
 
-const _SxA8c9 = defineEventHandler$1(() => {});
+const _SxA8c9 = defineEventHandler(() => {});
 
-const HASH_RE = /#/g;
-const AMPERSAND_RE = /&/g;
-const SLASH_RE = /\//g;
-const EQUAL_RE = /=/g;
-const IM_RE = /\?/g;
-const PLUS_RE = /\+/g;
-const ENC_CARET_RE = /%5e/gi;
-const ENC_BACKTICK_RE = /%60/gi;
-const ENC_PIPE_RE = /%7c/gi;
-const ENC_SPACE_RE = /%20/gi;
-const ENC_SLASH_RE = /%2f/gi;
-const ENC_ENC_SLASH_RE = /%252f/gi;
-function encode(text) {
-  return encodeURI("" + text).replace(ENC_PIPE_RE, "|");
-}
-function encodeQueryValue(input) {
-  return encode(typeof input === "string" ? input : JSON.stringify(input)).replace(PLUS_RE, "%2B").replace(ENC_SPACE_RE, "+").replace(HASH_RE, "%23").replace(AMPERSAND_RE, "%26").replace(ENC_BACKTICK_RE, "`").replace(ENC_CARET_RE, "^").replace(SLASH_RE, "%2F");
-}
-function encodeQueryKey(text) {
-  return encodeQueryValue(text).replace(EQUAL_RE, "%3D");
-}
-function encodePath(text) {
-  return encode(text).replace(HASH_RE, "%23").replace(IM_RE, "%3F").replace(ENC_ENC_SLASH_RE, "%2F").replace(AMPERSAND_RE, "%26").replace(PLUS_RE, "%2B");
-}
-function encodeParam(text) {
-  return encodePath(text).replace(SLASH_RE, "%2F");
-}
-function decode$1(text = "") {
-  try {
-    return decodeURIComponent("" + text);
-  } catch {
-    return "" + text;
-  }
-}
-function decodePath(text) {
-  return decode$1(text.replace(ENC_SLASH_RE, "%252F"));
-}
-function decodeQueryKey(text) {
-  return decode$1(text.replace(PLUS_RE, " "));
-}
-function decodeQueryValue(text) {
-  return decode$1(text.replace(PLUS_RE, " "));
-}
-
-function parseQuery(parametersString = "") {
-  const object = /* @__PURE__ */ Object.create(null);
-  if (parametersString[0] === "?") {
-    parametersString = parametersString.slice(1);
-  }
-  for (const parameter of parametersString.split("&")) {
-    const s = parameter.match(/([^=]+)=?(.*)/) || [];
-    if (s.length < 2) {
-      continue;
-    }
-    const key = decodeQueryKey(s[1]);
-    if (key === "__proto__" || key === "constructor") {
-      continue;
-    }
-    const value = decodeQueryValue(s[2] || "");
-    if (object[key] === void 0) {
-      object[key] = value;
-    } else if (Array.isArray(object[key])) {
-      object[key].push(value);
-    } else {
-      object[key] = [object[key], value];
-    }
-  }
-  return object;
-}
-function encodeQueryItem(key, value) {
-  if (typeof value === "number" || typeof value === "boolean") {
-    value = String(value);
-  }
-  if (!value) {
-    return encodeQueryKey(key);
-  }
-  if (Array.isArray(value)) {
-    return value.map(
-      (_value) => `${encodeQueryKey(key)}=${encodeQueryValue(_value)}`
-    ).join("&");
-  }
-  return `${encodeQueryKey(key)}=${encodeQueryValue(value)}`;
-}
-function stringifyQuery(query) {
-  return Object.keys(query).filter((k) => query[k] !== void 0).map((k) => encodeQueryItem(k, query[k])).filter(Boolean).join("&");
-}
-
-const PROTOCOL_STRICT_REGEX = /^[\s\w\0+.-]{2,}:([/\\]{1,2})/;
-const PROTOCOL_REGEX = /^[\s\w\0+.-]{2,}:([/\\]{2})?/;
-const PROTOCOL_RELATIVE_REGEX = /^([/\\]\s*){2,}[^/\\]/;
-const PROTOCOL_SCRIPT_RE = /^[\s\0]*(blob|data|javascript|vbscript):$/i;
-const TRAILING_SLASH_RE = /\/$|\/\?|\/#/;
-const JOIN_LEADING_SLASH_RE = /^\.?\//;
-function hasProtocol(inputString, opts = {}) {
-  if (typeof opts === "boolean") {
-    opts = { acceptRelative: opts };
-  }
-  if (opts.strict) {
-    return PROTOCOL_STRICT_REGEX.test(inputString);
-  }
-  return PROTOCOL_REGEX.test(inputString) || (opts.acceptRelative ? PROTOCOL_RELATIVE_REGEX.test(inputString) : false);
-}
-function isScriptProtocol(protocol) {
-  return !!protocol && PROTOCOL_SCRIPT_RE.test(protocol);
-}
-function hasTrailingSlash(input = "", respectQueryAndFragment) {
-  if (!respectQueryAndFragment) {
-    return input.endsWith("/");
-  }
-  return TRAILING_SLASH_RE.test(input);
-}
-function withoutTrailingSlash(input = "", respectQueryAndFragment) {
-  if (!respectQueryAndFragment) {
-    return (hasTrailingSlash(input) ? input.slice(0, -1) : input) || "/";
-  }
-  if (!hasTrailingSlash(input, true)) {
-    return input || "/";
-  }
-  let path = input;
-  let fragment = "";
-  const fragmentIndex = input.indexOf("#");
-  if (fragmentIndex !== -1) {
-    path = input.slice(0, fragmentIndex);
-    fragment = input.slice(fragmentIndex);
-  }
-  const [s0, ...s] = path.split("?");
-  const cleanPath = s0.endsWith("/") ? s0.slice(0, -1) : s0;
-  return (cleanPath || "/") + (s.length > 0 ? `?${s.join("?")}` : "") + fragment;
-}
-function withTrailingSlash(input = "", respectQueryAndFragment) {
-  if (!respectQueryAndFragment) {
-    return input.endsWith("/") ? input : input + "/";
-  }
-  if (hasTrailingSlash(input, true)) {
-    return input || "/";
-  }
-  let path = input;
-  let fragment = "";
-  const fragmentIndex = input.indexOf("#");
-  if (fragmentIndex !== -1) {
-    path = input.slice(0, fragmentIndex);
-    fragment = input.slice(fragmentIndex);
-    if (!path) {
-      return fragment;
-    }
-  }
-  const [s0, ...s] = path.split("?");
-  return s0 + "/" + (s.length > 0 ? `?${s.join("?")}` : "") + fragment;
-}
-function hasLeadingSlash(input = "") {
-  return input.startsWith("/");
-}
-function withLeadingSlash(input = "") {
-  return hasLeadingSlash(input) ? input : "/" + input;
-}
-function withoutBase(input, base) {
-  if (isEmptyURL(base)) {
-    return input;
-  }
-  const _base = withoutTrailingSlash(base);
-  if (!input.startsWith(_base)) {
-    return input;
-  }
-  const nextChar = input[_base.length];
-  if (nextChar && nextChar !== "/" && nextChar !== "?") {
-    return input;
-  }
-  const trimmed = input.slice(_base.length);
-  return trimmed[0] === "/" ? trimmed : "/" + trimmed;
-}
-function withQuery(input, query) {
-  const parsed = parseURL(input);
-  const mergedQuery = { ...parseQuery(parsed.search), ...query };
-  parsed.search = stringifyQuery(mergedQuery);
-  return stringifyParsedURL(parsed);
-}
-function isEmptyURL(url) {
-  return !url || url === "/";
-}
-function isNonEmptyURL(url) {
-  return url && url !== "/";
-}
-function joinURL(base, ...input) {
-  let url = base || "";
-  for (const segment of input.filter((url2) => isNonEmptyURL(url2))) {
-    if (url) {
-      const _segment = segment.replace(JOIN_LEADING_SLASH_RE, "");
-      url = withTrailingSlash(url) + _segment;
-    } else {
-      url = segment;
-    }
-  }
-  return url;
-}
-
-const protocolRelative = Symbol.for("ufo:protocolRelative");
-function parseURL(input = "", defaultProto) {
-  const _specialProtoMatch = input.match(
-    /^[\s\0]*(blob:|data:|javascript:|vbscript:)(.*)/i
-  );
-  if (_specialProtoMatch) {
-    const [, _proto, _pathname = ""] = _specialProtoMatch;
-    return {
-      protocol: _proto.toLowerCase(),
-      pathname: _pathname,
-      href: _proto + _pathname,
-      auth: "",
-      host: "",
-      search: "",
-      hash: ""
-    };
-  }
-  if (!hasProtocol(input, { acceptRelative: true })) {
-    return parsePath(input);
-  }
-  const [, protocol = "", auth, hostAndPath = ""] = input.replace(/\\/g, "/").match(/^[\s\0]*([\w+.-]{2,}:)?\/\/([^/@]+@)?(.*)/) || [];
-  let [, host = "", path = ""] = hostAndPath.match(/([^#/?]*)(.*)?/) || [];
-  if (protocol === "file:") {
-    path = path.replace(/\/(?=[A-Za-z]:)/, "");
-  }
-  const { pathname, search, hash } = parsePath(path);
-  return {
-    protocol: protocol.toLowerCase(),
-    auth: auth ? auth.slice(0, Math.max(0, auth.length - 1)) : "",
-    host,
-    pathname,
-    search,
-    hash,
-    [protocolRelative]: !protocol
-  };
-}
-function parsePath(input = "") {
-  const [pathname = "", search = "", hash = ""] = (input.match(/([^#?]*)(\?[^#]*)?(#.*)?/) || []).splice(1);
-  return {
-    pathname,
-    search,
-    hash
-  };
-}
-function stringifyParsedURL(parsed) {
-  const pathname = parsed.pathname || "";
-  const search = parsed.search ? (parsed.search.startsWith("?") ? "" : "?") + parsed.search : "";
-  const hash = parsed.hash || "";
-  const auth = parsed.auth ? parsed.auth + "@" : "";
-  const host = parsed.host || "";
-  const proto = parsed.protocol || parsed[protocolRelative] ? (parsed.protocol || "") + "//" : "";
-  return proto + auth + host + pathname + search + hash;
-}
-
-function parse(str, options) {
-  if (typeof str !== "string") {
-    throw new TypeError("argument str must be a string");
-  }
-  const obj = {};
-  const opt = {};
-  const dec = opt.decode || decode;
-  let index = 0;
-  while (index < str.length) {
-    const eqIdx = str.indexOf("=", index);
-    if (eqIdx === -1) {
-      break;
-    }
-    let endIdx = str.indexOf(";", index);
-    if (endIdx === -1) {
-      endIdx = str.length;
-    } else if (endIdx < eqIdx) {
-      index = str.lastIndexOf(";", eqIdx - 1) + 1;
-      continue;
-    }
-    const key = str.slice(index, eqIdx).trim();
-    if (opt?.filter && !opt?.filter(key)) {
-      index = endIdx + 1;
-      continue;
-    }
-    if (void 0 === obj[key]) {
-      let val = str.slice(eqIdx + 1, endIdx).trim();
-      if (val.codePointAt(0) === 34) {
-        val = val.slice(1, -1);
-      }
-      obj[key] = tryDecode(val, dec);
-    }
-    index = endIdx + 1;
-  }
-  return obj;
-}
-function decode(str) {
-  return str.includes("%") ? decodeURIComponent(str) : str;
-}
-function tryDecode(str, decode2) {
-  try {
-    return decode2(str);
-  } catch {
-    return str;
-  }
-}
-
-const fieldContentRegExp = /^[\u0009\u0020-\u007E\u0080-\u00FF]+$/;
-function serialize(name, value, options) {
-  const opt = options || {};
-  const enc = opt.encode || encodeURIComponent;
-  if (typeof enc !== "function") {
-    throw new TypeError("option encode is invalid");
-  }
-  if (!fieldContentRegExp.test(name)) {
-    throw new TypeError("argument name is invalid");
-  }
-  const encodedValue = enc(value);
-  if (encodedValue && !fieldContentRegExp.test(encodedValue)) {
-    throw new TypeError("argument val is invalid");
-  }
-  let str = name + "=" + encodedValue;
-  if (void 0 !== opt.maxAge && opt.maxAge !== null) {
-    const maxAge = opt.maxAge - 0;
-    if (Number.isNaN(maxAge) || !Number.isFinite(maxAge)) {
-      throw new TypeError("option maxAge is invalid");
-    }
-    str += "; Max-Age=" + Math.floor(maxAge);
-  }
-  if (opt.domain) {
-    if (!fieldContentRegExp.test(opt.domain)) {
-      throw new TypeError("option domain is invalid");
-    }
-    str += "; Domain=" + opt.domain;
-  }
-  if (opt.path) {
-    if (!fieldContentRegExp.test(opt.path)) {
-      throw new TypeError("option path is invalid");
-    }
-    str += "; Path=" + opt.path;
-  }
-  if (opt.expires) {
-    if (!isDate(opt.expires) || Number.isNaN(opt.expires.valueOf())) {
-      throw new TypeError("option expires is invalid");
-    }
-    str += "; Expires=" + opt.expires.toUTCString();
-  }
-  if (opt.httpOnly) {
-    str += "; HttpOnly";
-  }
-  if (opt.secure) {
-    str += "; Secure";
-  }
-  if (opt.priority) {
-    const priority = typeof opt.priority === "string" ? opt.priority.toLowerCase() : opt.priority;
-    switch (priority) {
-      case "low": {
-        str += "; Priority=Low";
-        break;
-      }
-      case "medium": {
-        str += "; Priority=Medium";
-        break;
-      }
-      case "high": {
-        str += "; Priority=High";
-        break;
-      }
-      default: {
-        throw new TypeError("option priority is invalid");
-      }
-    }
-  }
-  if (opt.sameSite) {
-    const sameSite = typeof opt.sameSite === "string" ? opt.sameSite.toLowerCase() : opt.sameSite;
-    switch (sameSite) {
-      case true: {
-        str += "; SameSite=Strict";
-        break;
-      }
-      case "lax": {
-        str += "; SameSite=Lax";
-        break;
-      }
-      case "strict": {
-        str += "; SameSite=Strict";
-        break;
-      }
-      case "none": {
-        str += "; SameSite=None";
-        break;
-      }
-      default: {
-        throw new TypeError("option sameSite is invalid");
-      }
-    }
-  }
-  if (opt.partitioned) {
-    str += "; Partitioned";
-  }
-  return str;
-}
-function isDate(val) {
-  return Object.prototype.toString.call(val) === "[object Date]" || val instanceof Date;
-}
-
-function parseSetCookie(setCookieValue, options) {
-  const parts = (setCookieValue || "").split(";").filter((str) => typeof str === "string" && !!str.trim());
-  const nameValuePairStr = parts.shift() || "";
-  const parsed = _parseNameValuePair(nameValuePairStr);
-  const name = parsed.name;
-  let value = parsed.value;
-  try {
-    value = options?.decode === false ? value : (options?.decode || decodeURIComponent)(value);
-  } catch {
-  }
-  const cookie = {
-    name,
-    value
-  };
-  for (const part of parts) {
-    const sides = part.split("=");
-    const partKey = (sides.shift() || "").trimStart().toLowerCase();
-    const partValue = sides.join("=");
-    switch (partKey) {
-      case "expires": {
-        cookie.expires = new Date(partValue);
-        break;
-      }
-      case "max-age": {
-        cookie.maxAge = Number.parseInt(partValue, 10);
-        break;
-      }
-      case "secure": {
-        cookie.secure = true;
-        break;
-      }
-      case "httponly": {
-        cookie.httpOnly = true;
-        break;
-      }
-      case "samesite": {
-        cookie.sameSite = partValue;
-        break;
-      }
-      default: {
-        cookie[partKey] = partValue;
-      }
-    }
-  }
-  return cookie;
-}
-function _parseNameValuePair(nameValuePairStr) {
-  let name = "";
-  let value = "";
-  const nameValueArr = nameValuePairStr.split("=");
-  if (nameValueArr.length > 1) {
-    name = nameValueArr.shift();
-    value = nameValueArr.join("=");
-  } else {
-    value = nameValuePairStr;
-  }
-  return { name, value };
-}
-
-const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
-const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
-const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
-function jsonParseTransform(key, value) {
-  if (key === "__proto__" || key === "constructor" && value && typeof value === "object" && "prototype" in value) {
-    warnKeyDropped(key);
-    return;
-  }
-  return value;
-}
-function warnKeyDropped(key) {
-  console.warn(`[destr] Dropping "${key}" key to prevent prototype pollution.`);
-}
-function destr(value, options = {}) {
-  if (typeof value !== "string") {
-    return value;
-  }
-  if (value[0] === '"' && value[value.length - 1] === '"' && value.indexOf("\\") === -1) {
-    return value.slice(1, -1);
-  }
-  const _value = value.trim();
-  if (_value.length <= 9) {
-    switch (_value.toLowerCase()) {
-      case "true": {
-        return true;
-      }
-      case "false": {
-        return false;
-      }
-      case "undefined": {
-        return void 0;
-      }
-      case "null": {
-        return null;
-      }
-      case "nan": {
-        return Number.NaN;
-      }
-      case "infinity": {
-        return Number.POSITIVE_INFINITY;
-      }
-      case "-infinity": {
-        return Number.NEGATIVE_INFINITY;
-      }
-    }
-  }
-  if (!JsonSigRx.test(value)) {
-    if (options.strict) {
-      throw new SyntaxError("[destr] Invalid JSON");
-    }
-    return value;
-  }
-  try {
-    if (suspectProtoRx.test(value) || suspectConstructorRx.test(value)) {
-      if (options.strict) {
-        throw new Error("[destr] Possible prototype pollution");
-      }
-      return JSON.parse(value, jsonParseTransform);
-    }
-    return JSON.parse(value);
-  } catch (error) {
-    if (options.strict) {
-      throw error;
-    }
-    return value;
-  }
-}
-
-function isPlainObject(value) {
-  if (value === null || typeof value !== "object") {
-    return false;
-  }
-  const prototype = Object.getPrototypeOf(value);
-  if (prototype !== null && prototype !== Object.prototype && Object.getPrototypeOf(prototype) !== null) {
-    return false;
-  }
-  if (Symbol.iterator in value) {
-    return false;
-  }
-  if (Symbol.toStringTag in value) {
-    return Object.prototype.toString.call(value) === "[object Module]";
-  }
-  return true;
-}
-
-function _defu(baseObject, defaults, namespace = ".", merger) {
-  if (!isPlainObject(defaults)) {
-    return _defu(baseObject, {}, namespace, merger);
-  }
-  const object = Object.assign({}, defaults);
-  for (const key in baseObject) {
-    if (key === "__proto__" || key === "constructor") {
-      continue;
-    }
-    const value = baseObject[key];
-    if (value === null || value === void 0) {
-      continue;
-    }
-    if (merger && merger(object, key, value, namespace)) {
-      continue;
-    }
-    if (Array.isArray(value) && Array.isArray(object[key])) {
-      object[key] = [...value, ...object[key]];
-    } else if (isPlainObject(value) && isPlainObject(object[key])) {
-      object[key] = _defu(
-        value,
-        object[key],
-        (namespace ? `${namespace}.` : "") + key.toString(),
-        merger
-      );
-    } else {
-      object[key] = value;
-    }
-  }
-  return object;
-}
-function createDefu(merger) {
-  return (...arguments_) => (
-    // eslint-disable-next-line unicorn/no-array-reduce
-    arguments_.reduce((p, c) => _defu(p, c, "", merger), {})
-  );
-}
-const defu = createDefu();
-
-function useBase(base, handler) {
-  base = withoutTrailingSlash(base);
-  if (!base || base === "/") {
-    return handler;
-  }
-  return eventHandler(async (event) => {
-    event.node.req.originalUrl = event.node.req.originalUrl || event.node.req.url || "/";
-    const _path = event._path || event.node.req.url || "/";
-    event._path = withoutBase(event.path || "/", base);
-    event.node.req.url = event._path;
-    try {
-      return await handler(event);
-    } finally {
-      event._path = event.node.req.url = _path;
-    }
-  });
-}
-
-function hasProp(obj, prop) {
-  try {
-    return prop in obj;
-  } catch {
-    return false;
-  }
-}
-
-class H3Error extends Error {
-  static __h3_error__ = true;
-  statusCode = 500;
-  fatal = false;
-  unhandled = false;
-  statusMessage;
-  data;
-  cause;
-  constructor(message, opts = {}) {
-    super(message, opts);
-    if (opts.cause && !this.cause) {
-      this.cause = opts.cause;
-    }
-  }
-  toJSON() {
-    const obj = {
-      message: this.message,
-      statusCode: sanitizeStatusCode(this.statusCode, 500)
-    };
-    if (this.statusMessage) {
-      obj.statusMessage = sanitizeStatusMessage(this.statusMessage);
-    }
-    if (this.data !== void 0) {
-      obj.data = this.data;
-    }
-    return obj;
-  }
-}
-function createError(input) {
-  if (typeof input === "string") {
-    return new H3Error(input);
-  }
-  if (isError(input)) {
-    return input;
-  }
-  const err = new H3Error(input.message ?? input.statusMessage ?? "", {
-    cause: input.cause || input
-  });
-  if (hasProp(input, "stack")) {
-    try {
-      Object.defineProperty(err, "stack", {
-        get() {
-          return input.stack;
-        }
-      });
-    } catch {
-      try {
-        err.stack = input.stack;
-      } catch {
-      }
-    }
-  }
-  if (input.data) {
-    err.data = input.data;
-  }
-  if (input.statusCode) {
-    err.statusCode = sanitizeStatusCode(input.statusCode, err.statusCode);
-  } else if (input.status) {
-    err.statusCode = sanitizeStatusCode(input.status, err.statusCode);
-  }
-  if (input.statusMessage) {
-    err.statusMessage = input.statusMessage;
-  } else if (input.statusText) {
-    err.statusMessage = input.statusText;
-  }
-  if (err.statusMessage) {
-    const originalMessage = err.statusMessage;
-    const sanitizedMessage = sanitizeStatusMessage(err.statusMessage);
-    if (sanitizedMessage !== originalMessage) {
-      console.warn(
-        "[h3] Please prefer using `message` for longer error messages instead of `statusMessage`. In the future, `statusMessage` will be sanitized by default."
-      );
-    }
-  }
-  if (input.fatal !== void 0) {
-    err.fatal = input.fatal;
-  }
-  if (input.unhandled !== void 0) {
-    err.unhandled = input.unhandled;
-  }
-  return err;
-}
-function isError(input) {
-  return input?.constructor?.__h3_error__ === true;
-}
-function getRouterParams(event, opts = {}) {
-  let params = event.context.params || {};
-  if (opts.decode) {
-    params = { ...params };
-    for (const key in params) {
-      params[key] = decode$1(params[key]);
-    }
-  }
-  return params;
-}
-function getRouterParam(event, name, opts = {}) {
-  const params = getRouterParams(event, opts);
-  return params[name];
-}
-function isMethod(event, expected, allowHead) {
-  if (typeof expected === "string") {
-    if (event.method === expected) {
-      return true;
-    }
-  } else if (expected.includes(event.method)) {
-    return true;
-  }
-  return false;
-}
-function assertMethod(event, expected, allowHead) {
-  if (!isMethod(event, expected)) {
-    throw createError({
-      statusCode: 405,
-      statusMessage: "HTTP method is not allowed."
-    });
-  }
-}
-function getRequestHeaders(event) {
-  const _headers = {};
-  for (const key in event.node.req.headers) {
-    const val = event.node.req.headers[key];
-    _headers[key] = Array.isArray(val) ? val.filter(Boolean).join(", ") : val;
-  }
-  return _headers;
-}
-function getRequestHeader(event, name) {
-  const headers = getRequestHeaders(event);
-  const value = headers[name.toLowerCase()];
-  return value;
-}
-
-const RawBodySymbol = Symbol.for("h3RawBody");
-const ParsedBodySymbol = Symbol.for("h3ParsedBody");
-const PayloadMethods$1 = ["PATCH", "POST", "PUT", "DELETE"];
-function readRawBody(event, encoding = "utf8") {
-  assertMethod(event, PayloadMethods$1);
-  const _rawBody = event._requestBody || event.web?.request?.body || event.node.req[RawBodySymbol] || event.node.req.rawBody || event.node.req.body;
-  if (_rawBody) {
-    const promise2 = Promise.resolve(_rawBody).then((_resolved) => {
-      if (Buffer.isBuffer(_resolved)) {
-        return _resolved;
-      }
-      if (typeof _resolved.pipeTo === "function") {
-        return new Promise((resolve, reject) => {
-          const chunks = [];
-          _resolved.pipeTo(
-            new WritableStream({
-              write(chunk) {
-                chunks.push(chunk);
-              },
-              close() {
-                resolve(Buffer.concat(chunks));
-              },
-              abort(reason) {
-                reject(reason);
-              }
-            })
-          ).catch(reject);
-        });
-      } else if (typeof _resolved.pipe === "function") {
-        return new Promise((resolve, reject) => {
-          const chunks = [];
-          _resolved.on("data", (chunk) => {
-            chunks.push(chunk);
-          }).on("end", () => {
-            resolve(Buffer.concat(chunks));
-          }).on("error", reject);
-        });
-      }
-      if (_resolved.constructor === Object) {
-        return Buffer.from(JSON.stringify(_resolved));
-      }
-      if (_resolved instanceof URLSearchParams) {
-        return Buffer.from(_resolved.toString());
-      }
-      if (_resolved instanceof FormData) {
-        return new Response(_resolved).bytes().then((uint8arr) => Buffer.from(uint8arr));
-      }
-      return Buffer.from(_resolved);
-    });
-    return encoding ? promise2.then((buff) => buff.toString(encoding)) : promise2;
-  }
-  if (!Number.parseInt(event.node.req.headers["content-length"] || "") && !/\bchunked\b/i.test(
-    String(event.node.req.headers["transfer-encoding"] ?? "")
-  )) {
-    return Promise.resolve(void 0);
-  }
-  const promise = event.node.req[RawBodySymbol] = new Promise(
-    (resolve, reject) => {
-      const bodyData = [];
-      event.node.req.on("error", (err) => {
-        reject(err);
-      }).on("data", (chunk) => {
-        bodyData.push(chunk);
-      }).on("end", () => {
-        resolve(Buffer.concat(bodyData));
-      });
-    }
-  );
-  const result = encoding ? promise.then((buff) => buff.toString(encoding)) : promise;
-  return result;
-}
-async function readBody(event, options = {}) {
-  const request = event.node.req;
-  if (hasProp(request, ParsedBodySymbol)) {
-    return request[ParsedBodySymbol];
-  }
-  const contentType = request.headers["content-type"] || "";
-  const body = await readRawBody(event);
-  let parsed;
-  if (contentType === "application/json") {
-    parsed = _parseJSON(body, options.strict ?? true);
-  } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-    parsed = _parseURLEncodedBody(body);
-  } else if (contentType.startsWith("text/")) {
-    parsed = body;
-  } else {
-    parsed = _parseJSON(body, options.strict ?? false);
-  }
-  request[ParsedBodySymbol] = parsed;
-  return parsed;
-}
-function _parseJSON(body = "", strict) {
-  if (!body) {
-    return void 0;
-  }
-  try {
-    return destr(body, { strict });
-  } catch {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      message: "Invalid JSON body"
-    });
-  }
-}
-function _parseURLEncodedBody(body) {
-  const form = new URLSearchParams(body);
-  const parsedForm = /* @__PURE__ */ Object.create(null);
-  for (const [key, value] of form.entries()) {
-    if (hasProp(parsedForm, key)) {
-      if (!Array.isArray(parsedForm[key])) {
-        parsedForm[key] = [parsedForm[key]];
-      }
-      parsedForm[key].push(value);
-    } else {
-      parsedForm[key] = value;
-    }
-  }
-  return parsedForm;
-}
-
-const DISALLOWED_STATUS_CHARS = /[^\u0009\u0020-\u007E]/g;
-function sanitizeStatusMessage(statusMessage = "") {
-  return statusMessage.replace(DISALLOWED_STATUS_CHARS, "");
-}
-function sanitizeStatusCode(statusCode, defaultStatusCode = 200) {
-  if (!statusCode) {
-    return defaultStatusCode;
-  }
-  if (typeof statusCode === "string") {
-    statusCode = Number.parseInt(statusCode, 10);
-  }
-  if (statusCode < 100 || statusCode > 999) {
-    return defaultStatusCode;
-  }
-  return statusCode;
-}
-
-function getDistinctCookieKey(name, opts) {
-  return [name, opts.domain || "", opts.path || "/"].join(";");
-}
-
-function parseCookies(event) {
-  return parse(event.node.req.headers.cookie || "");
-}
-function getCookie(event, name) {
-  return parseCookies(event)[name];
-}
-function setCookie(event, name, value, serializeOptions = {}) {
-  if (!serializeOptions.path) {
-    serializeOptions = { path: "/", ...serializeOptions };
-  }
-  const newCookie = serialize(name, value, serializeOptions);
-  const currentCookies = splitCookiesString(
-    event.node.res.getHeader("set-cookie")
-  );
-  if (currentCookies.length === 0) {
-    event.node.res.setHeader("set-cookie", newCookie);
-    return;
-  }
-  const newCookieKey = getDistinctCookieKey(name, serializeOptions);
-  event.node.res.removeHeader("set-cookie");
-  for (const cookie of currentCookies) {
-    const parsed = parseSetCookie(cookie);
-    const key = getDistinctCookieKey(parsed.name, parsed);
-    if (key === newCookieKey) {
-      continue;
-    }
-    event.node.res.appendHeader("set-cookie", cookie);
-  }
-  event.node.res.appendHeader("set-cookie", newCookie);
-}
-function deleteCookie(event, name, serializeOptions) {
-  setCookie(event, name, "", {
-    ...serializeOptions,
-    maxAge: 0
-  });
-}
-function splitCookiesString(cookiesString) {
-  if (Array.isArray(cookiesString)) {
-    return cookiesString.flatMap((c) => splitCookiesString(c));
-  }
-  if (typeof cookiesString !== "string") {
-    return [];
-  }
-  const cookiesStrings = [];
-  let pos = 0;
-  let start;
-  let ch;
-  let lastComma;
-  let nextStart;
-  let cookiesSeparatorFound;
-  const skipWhitespace = () => {
-    while (pos < cookiesString.length && /\s/.test(cookiesString.charAt(pos))) {
-      pos += 1;
-    }
-    return pos < cookiesString.length;
-  };
-  const notSpecialChar = () => {
-    ch = cookiesString.charAt(pos);
-    return ch !== "=" && ch !== ";" && ch !== ",";
-  };
-  while (pos < cookiesString.length) {
-    start = pos;
-    cookiesSeparatorFound = false;
-    while (skipWhitespace()) {
-      ch = cookiesString.charAt(pos);
-      if (ch === ",") {
-        lastComma = pos;
-        pos += 1;
-        skipWhitespace();
-        nextStart = pos;
-        while (pos < cookiesString.length && notSpecialChar()) {
-          pos += 1;
-        }
-        if (pos < cookiesString.length && cookiesString.charAt(pos) === "=") {
-          cookiesSeparatorFound = true;
-          pos = nextStart;
-          cookiesStrings.push(cookiesString.slice(start, lastComma));
-          start = pos;
-        } else {
-          pos = lastComma + 1;
-        }
-      } else {
-        pos += 1;
-      }
-    }
-    if (!cookiesSeparatorFound || pos >= cookiesString.length) {
-      cookiesStrings.push(cookiesString.slice(start));
-    }
-  }
-  return cookiesStrings;
-}
-
-typeof setImmediate === "undefined" ? (fn) => fn() : setImmediate;
-function setResponseHeader(event, name, value) {
-  event.node.res.setHeader(name, value);
-}
-const setHeader = setResponseHeader;
-
-function defineEventHandler(handler) {
-  if (typeof handler === "function") {
-    handler.__is_handler__ = true;
-    return handler;
-  }
-  const _hooks = {
-    onRequest: _normalizeArray(handler.onRequest),
-    onBeforeResponse: _normalizeArray(handler.onBeforeResponse)
-  };
-  const _handler = (event) => {
-    return _callHandler(event, handler.handler, _hooks);
-  };
-  _handler.__is_handler__ = true;
-  _handler.__resolve__ = handler.handler.__resolve__;
-  _handler.__websocket__ = handler.websocket;
-  return _handler;
-}
-function _normalizeArray(input) {
-  return input ? Array.isArray(input) ? input : [input] : void 0;
-}
-async function _callHandler(event, handler, hooks) {
-  if (hooks.onRequest) {
-    for (const hook of hooks.onRequest) {
-      await hook(event);
-      if (event.handled) {
-        return;
-      }
-    }
-  }
-  const body = await handler(event);
-  const response = { body };
-  if (hooks.onBeforeResponse) {
-    for (const hook of hooks.onBeforeResponse) {
-      await hook(event, response);
-    }
-  }
-  return response.body;
-}
-const eventHandler = defineEventHandler;
-function isEventHandler(input) {
-  return hasProp(input, "__is_handler__");
-}
-function toEventHandler(input, _, _route) {
-  if (!isEventHandler(input)) {
-    console.warn(
-      "[h3] Implicit event handler conversion is deprecated. Use `eventHandler()` or `fromNodeMiddleware()` to define event handlers.",
-      "",
-      `
-     Handler: ${input}`
-    );
-  }
-  return input;
-}
-function defineLazyEventHandler(factory) {
-  let _promise;
-  let _resolved;
-  const resolveHandler = () => {
-    if (_resolved) {
-      return Promise.resolve(_resolved);
-    }
-    if (!_promise) {
-      _promise = Promise.resolve(factory()).then((r) => {
-        const handler2 = r.default || r;
-        if (typeof handler2 !== "function") {
-          throw new TypeError(
-            "Invalid lazy handler result. It should be a function:",
-            handler2
-          );
-        }
-        _resolved = { handler: toEventHandler(r.default || r) };
-        return _resolved;
-      });
-    }
-    return _promise;
-  };
-  const handler = eventHandler((event) => {
-    if (_resolved) {
-      return _resolved.handler(event);
-    }
-    return resolveHandler().then((r) => r.handler(event));
-  });
-  handler.__resolve__ = resolveHandler;
-  return handler;
-}
-const lazyEventHandler = defineLazyEventHandler;
-
-const _zlfc9x = eventHandler(async (event) => {
+const _mNkc_2 = eventHandler(async (event) => {
   const collection = getRouterParam(event, "collection") || event.path?.split("/")?.[2] || "";
   setHeader(event, "Content-Type", "text/plain");
   const data = await useStorage().getItem(`build:content:database.compressed.mjs`) || "";
@@ -6408,13 +5456,13 @@ function cleanupQuery(query, options = { removeString: false }) {
 
 function defineRenderHandler(render) {
   const runtimeConfig = useRuntimeConfig();
-  return eventHandler$1(async (event) => {
+  return eventHandler(async (event) => {
     const nitroApp = useNitroApp();
     const ctx = { event, render, response: void 0 };
     await nitroApp.hooks.callHook("render:before", ctx);
     if (!ctx.response) {
       if (event.path === `${runtimeConfig.app.baseURL}favicon.ico`) {
-        setResponseHeader$1(event, "Content-Type", "image/x-icon");
+        setResponseHeader(event, "Content-Type", "image/x-icon");
         return send(
           event,
           "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
@@ -6615,64 +5663,6 @@ function singleQuote(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
-const NUMBER_CHAR_RE = /\d/;
-const STR_SPLITTERS = ["-", "_", "/", "."];
-function isUppercase(char = "") {
-  if (NUMBER_CHAR_RE.test(char)) {
-    return void 0;
-  }
-  return char !== char.toLowerCase();
-}
-function splitByCase(str, separators) {
-  const splitters = STR_SPLITTERS;
-  const parts = [];
-  if (!str || typeof str !== "string") {
-    return parts;
-  }
-  let buff = "";
-  let previousUpper;
-  let previousSplitter;
-  for (const char of str) {
-    const isSplitter = splitters.includes(char);
-    if (isSplitter === true) {
-      parts.push(buff);
-      buff = "";
-      previousUpper = void 0;
-      continue;
-    }
-    const isUpper = isUppercase(char);
-    if (previousSplitter === false) {
-      if (previousUpper === false && isUpper === true) {
-        parts.push(buff);
-        buff = char;
-        previousUpper = isUpper;
-        continue;
-      }
-      if (previousUpper === true && isUpper === false && buff.length > 1) {
-        const lastChar = buff.at(-1);
-        parts.push(buff.slice(0, Math.max(0, buff.length - 1)));
-        buff = lastChar + char;
-        previousUpper = isUpper;
-        continue;
-      }
-    }
-    buff += char;
-    previousUpper = isUpper;
-    previousSplitter = isSplitter;
-  }
-  parts.push(buff);
-  return parts;
-}
-function upperFirst(str) {
-  return str ? str[0].toUpperCase() + str.slice(1) : "";
-}
-function pascalCase(str, opts) {
-  return str ? (Array.isArray(str) ? str : splitByCase(str)).map((p) => upperFirst(p)).join("") : "";
-}
-function kebabCase(str, joiner) {
-  return str ? (Array.isArray(str) ? str : splitByCase(str)).map((p) => p.toLowerCase()).join("-") : "";
-}
-
 const queryCollection$1 = (event, collection) => {
   return collectionQueryBuilder(collection, (collection2, sql) => fetchQuery(event, collection2, sql));
 };
@@ -6700,7 +5690,7 @@ async function verifyToken(token) {
   }
 }
 
-const _bG2E_7 = eventHandler(async (event) => {
+const _laf8gz = eventHandler(async (event) => {
   const { sql } = await readBody(event);
   const collection = getRouterParam(event, "collection") || event.path?.split("/")?.[2] || "";
   assertSafeQuery(sql, collection);
@@ -6711,7 +5701,7 @@ const _bG2E_7 = eventHandler(async (event) => {
   return loadDatabaseAdapter(conf).all(sql);
 });
 
-const _OjPn5W = lazyEventHandler(() => {
+const __W67nF = lazyEventHandler(() => {
   const opts = useRuntimeConfig().ipx || {};
   const fsDir = opts?.fs?.dir ? (Array.isArray(opts.fs.dir) ? opts.fs.dir : [opts.fs.dir]).map((dir) => isAbsolute(dir) ? dir : fileURLToPath(new URL(dir, globalThis._importMeta_.url))) : void 0;
   const fsStorage = opts.fs?.dir ? ipxFSStorage({ ...opts.fs, dir: fsDir }) : void 0;
@@ -6748,7 +5738,7 @@ const _lazy_DCdh19 = () => import('../routes/api/auth/login.post.mjs');
 const _lazy_gpDcdW = () => import('../routes/api/auth/logout.post.mjs');
 const _lazy_XB3Ue2 = () => import('../routes/api/auth/me.get.mjs');
 const _lazy_0Xu1zP = () => import('../routes/rss.xml.mjs');
-const _lazy_xLlSww = () => import('../routes/renderer.mjs');
+const _lazy_M9aWJY = () => import('../routes/renderer.mjs').then(function (n) { return n.r; });
 
 const handlers = [
   { route: '/api/admin/categories/:id', handler: _lazy_36e7HH, lazy: true, middleware: false, method: "delete" },
@@ -6770,14 +5760,14 @@ const handlers = [
   { route: '/api/auth/logout', handler: _lazy_gpDcdW, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/me', handler: _lazy_XB3Ue2, lazy: true, middleware: false, method: "get" },
   { route: '/rss.xml', handler: _lazy_0Xu1zP, lazy: true, middleware: false, method: undefined },
-  { route: '/__nuxt_error', handler: _lazy_xLlSww, lazy: true, middleware: false, method: undefined },
+  { route: '/__nuxt_error', handler: _lazy_M9aWJY, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
-  { route: '/__nuxt_content/content/sql_dump.txt', handler: _zlfc9x, lazy: false, middleware: false, method: undefined },
-  { route: '/__nuxt_content/info/sql_dump.txt', handler: _zlfc9x, lazy: false, middleware: false, method: undefined },
-  { route: '/__nuxt_content/content/query', handler: _bG2E_7, lazy: false, middleware: false, method: undefined },
-  { route: '/__nuxt_content/info/query', handler: _bG2E_7, lazy: false, middleware: false, method: undefined },
-  { route: '/_ipx/**', handler: _OjPn5W, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_xLlSww, lazy: true, middleware: false, method: undefined }
+  { route: '/__nuxt_content/content/sql_dump.txt', handler: _mNkc_2, lazy: false, middleware: false, method: undefined },
+  { route: '/__nuxt_content/info/sql_dump.txt', handler: _mNkc_2, lazy: false, middleware: false, method: undefined },
+  { route: '/__nuxt_content/content/query', handler: _laf8gz, lazy: false, middleware: false, method: undefined },
+  { route: '/__nuxt_content/info/query', handler: _laf8gz, lazy: false, middleware: false, method: undefined },
+  { route: '/_ipx/**', handler: __W67nF, lazy: false, middleware: false, method: undefined },
+  { route: '/**', handler: _lazy_M9aWJY, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
@@ -6798,7 +5788,7 @@ function createNitroApp() {
     }
   };
   const h3App = createApp({
-    debug: destr$1(false),
+    debug: destr(false),
     onError: (error, event) => {
       captureError(error, { event, tags: ["request"] });
       return errorHandler(error, event);
@@ -6874,7 +5864,7 @@ function createNitroApp() {
   globalThis.$fetch = $fetch;
   h3App.use(createRouteRulesHandler({ localFetch }));
   for (const h of handlers) {
-    let handler = h.lazy ? lazyEventHandler$1(h.handler) : h.handler;
+    let handler = h.lazy ? lazyEventHandler(h.handler) : h.handler;
     if (h.middleware || !h.route) {
       const middlewareBase = (config.app.baseURL + (h.route || "/")).replace(
         /\/+/g,
@@ -6921,6 +5911,53 @@ function useNitroApp() {
 }
 runNitroPlugins(nitroApp$1);
 
+function parse(str, options) {
+  if (typeof str !== "string") {
+    throw new TypeError("argument str must be a string");
+  }
+  const obj = {};
+  const opt = options || {};
+  const dec = opt.decode || decode;
+  let index = 0;
+  while (index < str.length) {
+    const eqIdx = str.indexOf("=", index);
+    if (eqIdx === -1) {
+      break;
+    }
+    let endIdx = str.indexOf(";", index);
+    if (endIdx === -1) {
+      endIdx = str.length;
+    } else if (endIdx < eqIdx) {
+      index = str.lastIndexOf(";", eqIdx - 1) + 1;
+      continue;
+    }
+    const key = str.slice(index, eqIdx).trim();
+    if (opt?.filter && !opt?.filter(key)) {
+      index = endIdx + 1;
+      continue;
+    }
+    if (void 0 === obj[key]) {
+      let val = str.slice(eqIdx + 1, endIdx).trim();
+      if (val.codePointAt(0) === 34) {
+        val = val.slice(1, -1);
+      }
+      obj[key] = tryDecode(val, dec);
+    }
+    index = endIdx + 1;
+  }
+  return obj;
+}
+function decode(str) {
+  return str.includes("%") ? decodeURIComponent(str) : str;
+}
+function tryDecode(str, decode2) {
+  try {
+    return decode2(str);
+  } catch {
+    return str;
+  }
+}
+
 const ISR_URL_PARAM = "__isr_route";
 
 const nitroApp = useNitroApp();
@@ -6928,7 +5965,7 @@ const handler = toNodeListener(nitroApp.h3App);
 const listener = function(req, res) {
   const isrRoute = req.headers["x-now-route-matches"];
   if (isrRoute) {
-    const { [ISR_URL_PARAM]: url } = parseQuery$1(isrRoute);
+    const { [ISR_URL_PARAM]: url } = parseQuery(isrRoute);
     if (url && typeof url === "string") {
       const routeRules = getRouteRulesForPath(url);
       if (routeRules.isr) {
@@ -6939,13 +5976,13 @@ const listener = function(req, res) {
     const queryIndex = req.url.indexOf("?");
     const urlQueryIndex = queryIndex === -1 ? -1 : req.url.indexOf(`${ISR_URL_PARAM}=`, queryIndex);
     if (urlQueryIndex !== -1) {
-      const { [ISR_URL_PARAM]: url, ...params } = parseQuery$1(
+      const { [ISR_URL_PARAM]: url, ...params } = parseQuery(
         req.url.slice(queryIndex)
       );
       if (url && typeof url === "string") {
         const routeRules = getRouteRulesForPath(url);
         if (routeRules.isr) {
-          req.url = withQuery$1(url, params);
+          req.url = withQuery(url, params);
         }
       }
     }
@@ -6953,5 +5990,5 @@ const listener = function(req, res) {
   return handler(req, res);
 };
 
-export { $fetch$1 as $, isScriptProtocol as A, joinURL as B, withQuery as C, sanitizeStatusCode as D, baseURL as E, defu$1 as F, parseQuery as G, withTrailingSlash as H, withoutTrailingSlash as I, getRequestHeaders as J, pascalCase as K, kebabCase as L, destr as M, executeAsync as N, getRequestHeader as O, setCookie as P, getCookie as Q, deleteCookie as R, withLeadingSlash$1 as S, withTrailingSlash$1 as T, defu as U, withLeadingSlash as V, encodeParam as W, listener as X, readMultipartFormData as a, getQuery as b, createError$2 as c, defineEventHandler$1 as d, createToken as e, setResponseHeader$1 as f, getCookie$1 as g, buildAssetsURL as h, getResponseStatusText as i, getResponseStatus as j, defineRenderHandler as k, destr$1 as l, getRouteRules as m, joinURL$1 as n, useNitroApp as o, publicAssetsURL as p, queryCollection as q, readBody$1 as r, setCookie$1 as s, createError as t, useRuntimeConfig as u, verifyToken as v, parseURL as w, encodePath as x, decodePath as y, hasProtocol as z };
+export { $fetch$1 as $, withQuery as A, sanitizeStatusCode as B, getContext as C, baseURL as D, createHooks as E, defu as F, executeAsync as G, parseQuery as H, withTrailingSlash as I, withoutTrailingSlash as J, getRequestHeaders as K, hash$1 as L, pascalCase as M, kebabCase as N, klona as O, parse as P, getRequestHeader as Q, isEqual as R, deleteCookie as S, withLeadingSlash as T, encodeParam as U, listener as V, readMultipartFormData as a, getQuery as b, createError$1 as c, defineEventHandler as d, createToken as e, setResponseHeader as f, getCookie as g, buildAssetsURL as h, getResponseStatusText as i, getResponseStatus as j, defineRenderHandler as k, destr as l, getRouteRules as m, joinURL as n, useNitroApp as o, publicAssetsURL as p, queryCollection as q, readBody as r, setCookie as s, parseURL as t, useRuntimeConfig as u, verifyToken as v, encodePath as w, decodePath as x, hasProtocol as y, isScriptProtocol as z };
 //# sourceMappingURL=nitro.mjs.map

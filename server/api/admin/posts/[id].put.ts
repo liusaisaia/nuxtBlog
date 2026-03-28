@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: '未登录' })
   }
   
-  const payload = verifyToken(token)
+  const payload = await verifyToken(token)
   if (!payload) {
     throw createError({ statusCode: 401, message: '登录已过期' })
   }
@@ -32,10 +32,9 @@ export default defineEventHandler(async (event) => {
     excerpt: body.excerpt,
     coverImage: body.coverImage,
     status: body.status,
-    featured: body.featured,
+    isFeatured: body.isFeatured ?? body.featured ?? false,
+    isSticky: body.isSticky ?? false,
     categoryId: body.categoryId,
-    seoTitle: body.seoTitle,
-    seoDescription: body.seoDescription,
     updatedAt: new Date()
   }
   

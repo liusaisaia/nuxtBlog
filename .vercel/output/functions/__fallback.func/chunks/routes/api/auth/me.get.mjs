@@ -24,7 +24,7 @@ const me_get = defineEventHandler(async (event) => {
       message: "\u672A\u767B\u5F55"
     });
   }
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   if (!payload) {
     throw createError({
       statusCode: 401,
@@ -36,7 +36,7 @@ const me_get = defineEventHandler(async (event) => {
     username: users.username,
     email: users.email,
     createdAt: users.createdAt
-  }).from(users).where(eq(users.id, payload.userId));
+  }).from(users).where(eq(users.id, payload.id));
   if (!user) {
     throw createError({
       statusCode: 404,

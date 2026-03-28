@@ -2,6 +2,7 @@
 const name = ref('')
 const slug = ref('')
 const { data: categories, refresh } = await useFetch('/api/admin/categories')
+const categoryList = computed(() => categories.value?.list || [])
 
 async function createCategory() {
   if (!name.value) return
@@ -47,7 +48,7 @@ async function deleteCategory(id: number) {
           </tr>
         </thead>
         <tbody class="divide-y">
-          <tr v-for="cat in categories" :key="cat.id">
+          <tr v-for="cat in categoryList" :key="cat.id">
             <td class="px-6 py-4">{{ cat.name }}</td>
             <td class="px-6 py-4 text-gray-500">{{ cat.slug }}</td>
             <td class="px-6 py-4 text-right">

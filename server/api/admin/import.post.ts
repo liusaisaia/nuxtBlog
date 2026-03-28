@@ -1,4 +1,3 @@
-import { readBody } from 'h3'
 import { db } from '~/server/database'
 import { posts } from '~/server/database/schema'
 import { verifyToken } from '~/server/utils/auth'
@@ -36,8 +35,7 @@ export default defineEventHandler(async (event) => {
   let title = filename.replace('.md', '')
   let postContent = content
   let excerpt = ''
-  let categoryId: number | undefined
-  let tags: string[] = []
+  const categoryId: number | undefined = undefined
   let coverImage = ''
 
   try {
@@ -51,10 +49,7 @@ export default defineEventHandler(async (event) => {
       // TODO: Look up category by name/slug
     }
     
-    if (parsed.data.tags) {
-      tags = Array.isArray(parsed.data.tags) ? parsed.data.tags : [parsed.data.tags]
-    }
-  } catch (e) {
+  } catch {
     // If parsing fails, use the whole content
     postContent = content
   }

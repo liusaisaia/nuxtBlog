@@ -39,8 +39,7 @@ const import_post = defineEventHandler(async (event) => {
   let title = filename.replace(".md", "");
   let postContent = content;
   let excerpt = "";
-  let categoryId;
-  let tags = [];
+  const categoryId = void 0;
   let coverImage = "";
   try {
     const parsed = matter(content);
@@ -50,10 +49,7 @@ const import_post = defineEventHandler(async (event) => {
     coverImage = parsed.data.cover || "";
     if (parsed.data.category) {
     }
-    if (parsed.data.tags) {
-      tags = Array.isArray(parsed.data.tags) ? parsed.data.tags : [parsed.data.tags];
-    }
-  } catch (e) {
+  } catch {
     postContent = content;
   }
   const slug = title.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";

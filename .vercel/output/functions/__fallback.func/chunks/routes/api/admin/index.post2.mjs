@@ -22,7 +22,7 @@ const index_post = defineEventHandler(async (event) => {
   if (!token) {
     throw createError({ statusCode: 401, message: "\u672A\u767B\u5F55" });
   }
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   if (!payload) {
     throw createError({ statusCode: 401, message: "\u767B\u5F55\u5DF2\u8FC7\u671F" });
   }
@@ -34,13 +34,15 @@ const index_post = defineEventHandler(async (event) => {
     excerpt: body.excerpt || "",
     coverImage: body.coverImage || "",
     status: body.status || "draft",
-    featured: body.featured || false,
+    isFeatured: body.isFeatured || false,
+    isSticky: body.isSticky || false,
     categoryId: body.categoryId || null,
-    seoTitle: body.seoTitle || body.title,
-    seoDescription: body.seoDescription || body.excerpt || "",
     publishedAt: body.status === "published" ? /* @__PURE__ */ new Date() : null,
     viewCount: 0
   }).returning();
+  if (!post) {
+    throw createError({ statusCode: 500, message: "\u6587\u7AE0\u521B\u5EFA\u5931\u8D25" });
+  }
   if (body.tagIds && body.tagIds.length > 0) {
     const tagRelations = body.tagIds.map((tagId) => ({
       postId: post.id,

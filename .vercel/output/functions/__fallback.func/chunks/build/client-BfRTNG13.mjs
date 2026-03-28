@@ -1,4 +1,4 @@
-import { I as withoutTrailingSlash, J as getRequestHeaders } from '../nitro/nitro.mjs';
+import { J as withoutTrailingSlash, K as getRequestHeaders } from '../nitro/nitro.mjs';
 import { t as tryUseNuxtApp } from './server.mjs';
 
 const checksums = {

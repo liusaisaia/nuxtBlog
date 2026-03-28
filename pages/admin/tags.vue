@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const name = ref('')
 const { data: tags, refresh } = await useFetch('/api/admin/tags')
+const tagList = computed(() => tags.value?.list || [])
 
 async function createTag() {
   if (!name.value) return
@@ -36,11 +37,11 @@ async function deleteTag(id: number) {
     
     <div class="bg-white rounded-lg shadow p-6">
       <div class="flex flex-wrap gap-2">
-        <span v-for="tag in tags" :key="tag.id" class="bg-gray-100 px-3 py-1 rounded-full flex items-center gap-2">
+        <span v-for="tag in tagList" :key="tag.id" class="bg-gray-100 px-3 py-1 rounded-full flex items-center gap-2">
           {{ tag.name }}
           <button @click="deleteTag(tag.id)" class="text-red-500 hover:text-red-700">&times;</button>
         </span>
-        <span v-if="!tags?.length" class="text-gray-500">暂无标签</span>
+        <span v-if="!tagList.length" class="text-gray-500">暂无标签</span>
       </div>
     </div>
   </div>

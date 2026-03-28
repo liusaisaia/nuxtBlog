@@ -24,7 +24,7 @@ const rss_xml = defineEventHandler(async (event) => {
     pubDate: (/* @__PURE__ */ new Date()).toUTCString(),
     copyright: `All rights reserved ${(/* @__PURE__ */ new Date()).getFullYear()}, VoidZero Blog`
   });
-  const docs = await queryCollection(event, "content").order("date", "DESC").all();
+  const docs = await queryCollection("content").order("date", "DESC").all();
   for (const doc of docs) {
     feed.item({
       title: (_a = doc.title) != null ? _a : "-",

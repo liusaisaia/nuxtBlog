@@ -1,7 +1,6 @@
 import { db } from '~/server/database'
-import { posts, categories, tags, postTags } from '~/server/database/schema'
-import { eq, desc } from 'drizzle-orm'
-import { verifyToken } from '~/server/utils/auth'
+import { posts, tags, postTags } from '~/server/database/schema'
+import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = parseInt(event.context.params?.id as string)
@@ -21,10 +20,8 @@ export default defineEventHandler(async (event) => {
     excerpt: posts.excerpt,
     coverImage: posts.coverImage,
     status: posts.status,
-    featured: posts.featured,
+    featured: posts.isFeatured,
     viewCount: posts.viewCount,
-    seoTitle: posts.seoTitle,
-    seoDescription: posts.seoDescription,
     publishedAt: posts.publishedAt,
     createdAt: posts.createdAt,
     updatedAt: posts.updatedAt,

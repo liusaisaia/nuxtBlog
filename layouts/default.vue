@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-background-primary text-text-primary flex flex-col font-sans">
+  <div class="min-h-screen flex flex-col text-[var(--text)]">
     <AppHeader />
-    <main class="flex-grow">
+    <main class="flex-1 pt-20">
       <slot />
     </main>
     <AppFooter />

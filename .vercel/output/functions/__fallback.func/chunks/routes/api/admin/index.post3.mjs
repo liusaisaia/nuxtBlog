@@ -22,7 +22,7 @@ const index_post = defineEventHandler(async (event) => {
   if (!token) {
     throw createError({ statusCode: 401, message: "\u672A\u767B\u5F55" });
   }
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   if (!payload) {
     throw createError({ statusCode: 401, message: "\u767B\u5F55\u5DF2\u8FC7\u671F" });
   }

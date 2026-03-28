@@ -1,8 +1,7 @@
 <script setup lang="ts">
-const router = useRouter()
-
 // 获取文章列表
-const { data: posts, refresh } = await useFetch('/api/admin/posts')
+const { data: postsData, refresh } = await useFetch('/api/admin/posts')
+const posts = computed(() => postsData.value?.list || [])
 
 // 删除文章
 async function deletePost(id: number) {
@@ -10,6 +9,11 @@ async function deletePost(id: number) {
 
   await $fetch(`/api/admin/posts/${id}`, { method: 'DELETE' })
   refresh()
+}
+
+function formatDate(value: string | null) {
+  if (!value) return '-'
+  return new Date(value).toLocaleDateString('zh-CN')
 }
 </script>
 
@@ -40,12 +44,12 @@ async function deletePost(id: number) {
               </NuxtLink>
             </td>
             <td class="px-6 py-4">
-              <span :class="post.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" class="px-2 py-1 rounded text-xs">
-                {{ post.published ? '已发布' : '草稿' }}
+              <span :class="post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" class="px-2 py-1 rounded text-xs">
+                {{ post.status === 'published' ? '已发布' : '草稿' }}
               </span>
             </td>
             <td class="px-6 py-4 text-gray-500">
-              {{ new Date(post.createdAt).toLocaleDateString('zh-CN') }}
+              {{ formatDate(post.createdAt) }}
             </td>
             <td class="px-6 py-4 text-right">
               <NuxtLink :to="`/admin/posts/${post.id}`" class="text-blue-500 hover:text-blue-700 mr-4">

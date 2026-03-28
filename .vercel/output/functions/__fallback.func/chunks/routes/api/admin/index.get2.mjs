@@ -45,7 +45,7 @@ const index_get = defineEventHandler(async (event) => {
       slug: posts.slug,
       excerpt: posts.excerpt,
       status: posts.status,
-      featured: posts.featured,
+      featured: posts.isFeatured,
       viewCount: posts.viewCount,
       publishedAt: posts.publishedAt,
       createdAt: posts.createdAt,

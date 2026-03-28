@@ -16,11 +16,11 @@ import '@libsql/client';
 import 'drizzle-orm/sqlite-core';
 import 'drizzle-orm';
 
-const settings_get = defineEventHandler(async (event) => {
+const settings_get = defineEventHandler(async () => {
   const allSettings = await db.select().from(settings);
   const result = {};
   for (const s of allSettings) {
-    result[s.key] = s.value;
+    result[s.key] = s.value || "";
   }
   return { settings: result };
 });

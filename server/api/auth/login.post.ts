@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const user = result[0]
+  const user = result[0]!
 
   const passwordMatch = await bcrypt.compare(password, user.password)
   if (!passwordMatch) {

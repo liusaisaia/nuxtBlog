@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  const payload = verifyToken(token)
+  const payload = await verifyToken(token)
   
   if (!payload) {
     throw createError({
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     username: users.username,
     email: users.email,
     createdAt: users.createdAt
-  }).from(users).where(eq(users.id, payload.userId))
+  }).from(users).where(eq(users.id, payload.id))
   
   if (!user) {
     throw createError({
