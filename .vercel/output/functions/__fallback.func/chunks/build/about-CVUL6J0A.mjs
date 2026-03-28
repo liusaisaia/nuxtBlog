@@ -1,0 +1,125 @@
+import { ref, mergeProps, unref, useSSRContext } from 'vue';
+import { ssrRenderAttrs, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrInterpolate, ssrRenderStyle } from 'vue/server-renderer';
+import { u as useHead } from './server.mjs';
+import '../nitro/nitro.mjs';
+import 'jose';
+import 'node:http';
+import 'node:https';
+import 'node:events';
+import 'node:buffer';
+import 'node:fs';
+import 'node:path';
+import 'node:crypto';
+import 'better-sqlite3';
+import 'node:url';
+import 'ipx';
+import 'pinia';
+import 'vue-router';
+import '../routes/renderer.mjs';
+import 'vue-bundle-renderer/runtime';
+import 'unhead/server';
+import 'devalue';
+import 'unhead/utils';
+
+const _sfc_main = {
+  __name: "about",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const tocItems = [
+      { id: "profile", text: "个人简介" },
+      { id: "performance", text: "系统性能" },
+      { id: "toolchain", text: "工具链" },
+      { id: "experience", text: "职业经历" },
+      { id: "contact", text: "发起联系" }
+    ];
+    const activeSection = ref("profile");
+    const performanceBars = [
+      { value: 45 },
+      { value: 65 },
+      { value: 55 },
+      { value: 80 },
+      { value: 70 },
+      { value: 90 },
+      { value: 85 },
+      { value: 95 }
+    ];
+    const tools = [
+      { name: "TypeScript", icon: "🔷" },
+      { name: "React", icon: "⚛️" },
+      { name: "Vue", icon: "💚" },
+      { name: "Node.js", icon: "🟢" },
+      { name: "Rust", icon: "⚙️" },
+      { name: "Go", icon: "🔵" }
+    ];
+    const experiences = [
+      {
+        period: "2023 - 至今",
+        title: "高级软件架构师",
+        company: "VOIDZERO",
+        description: '领导核心编译器工具链的开发。通过自定义基于 Rust 的渲染引擎将构建时间缩短了 40%。为团队仪表板实现了"原子设计"系统。'
+      },
+      {
+        period: "2020 - 2023",
+        title: "全栈工程师",
+        company: "TechFlow Inc",
+        description: "管理从单体应用到微服务的迁移。专注于实时数据可视化和高吞吐量 API 设计。"
+      },
+      {
+        period: "2018 - 2020",
+        title: "初级开发者",
+        company: "Creative Code Lab",
+        description: "为电商客户开发响应式前端组件和自动化测试套件。"
+      }
+    ];
+    const socials = [
+      {
+        name: "GitHub",
+        link: "https://github.com",
+        icon: "M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+      },
+      {
+        name: "Twitter",
+        link: "https://twitter.com",
+        icon: "M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"
+      }
+    ];
+    useHead({
+      title: "关于 - VOIDZERO",
+      meta: [
+        { name: "description", content: "系统架构师 & 高级开发者，专注于构建现代 Web 工具。" }
+      ]
+    });
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "pt-24 min-h-screen" }, _attrs))}><div class="max-w-page mx-auto px-8 pb-20"><div class="flex gap-12"><aside class="w-56 flex-shrink-0 hidden lg:block"><div class="sticky top-24"><h3 class="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider"> 目录 </h3><nav class="space-y-1"><!--[-->`);
+      ssrRenderList(tocItems, (item) => {
+        _push(`<a${ssrRenderAttr("href", `#${item.id}`)} class="${ssrRenderClass([unref(activeSection) === item.id ? "text-accent-purple bg-accent-purple/10" : "text-text-secondary hover:text-white", "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all group"])}"><span class="${ssrRenderClass([unref(activeSection) === item.id ? "bg-accent-purple" : "bg-text-muted group-hover:bg-text-secondary", "w-1.5 h-1.5 rounded-full transition-colors"])}"></span><span>${ssrInterpolate(item.text)}</span></a>`);
+      });
+      _push(`<!--]--></nav></div></aside><div class="flex-1 min-w-0 space-y-20"><section id="profile" class="scroll-mt-32"><div class="flex flex-col md:flex-row gap-8 items-start"><div class="w-40 h-48 rounded-xl bg-gradient-to-br from-[#2a2435] to-[#1a1625] flex-shrink-0 overflow-hidden border border-[#3a3445]"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="头像" class="w-full h-full object-cover"></div><div class="flex-1"><div class="text-xs text-text-muted uppercase tracking-wider mb-2"> 系统架构师 &amp; 高级开发者 </div><h1 class="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight"> 我为现代 Web<br><span class="text-accent-purple">构建工具。</span></h1><p class="text-text-secondary leading-relaxed mb-6 max-w-xl"> 扎根于高性能工程与直观设计的交汇处。目前专注于在 VOIDZERO 构建超快工具链。我相信&quot;整体编辑器&quot;理念——软件应该像一个精密仪器。 </p><div class="flex items-center gap-4"><button class="px-5 py-2.5 rounded-lg bg-accent-purple text-white text-sm font-medium hover:bg-accent-purple/90 transition-all"> 下载简历 </button><button class="px-5 py-2.5 rounded-lg bg-[#1a1625] text-white text-sm font-medium border border-[#2a2435] hover:border-[#4a4060] transition-all"> 查看项目 </button></div></div></div></section><section id="performance" class="scroll-mt-32"><h2 class="text-xl font-bold text-white mb-6">系统性能</h2><div class="flex flex-col lg:flex-row gap-6"><div class="flex-1 p-6 rounded-xl bg-[#1a1625] border border-[#2a2435]"><div class="flex items-center justify-between mb-4"><span class="text-xs text-text-muted">性能指标概览</span><div class="flex items-center gap-4 text-xs"><span class="text-text-muted">2022</span><span class="text-accent-purple">2023</span><span class="text-text-muted">2024</span></div></div><div class="flex items-end justify-between h-32 gap-2"><!--[-->`);
+      ssrRenderList(performanceBars, (bar, index) => {
+        _push(`<div class="flex-1 bg-accent-purple/20 rounded-t-sm relative group" style="${ssrRenderStyle({ height: `${bar.value}%` })}"><div class="absolute bottom-0 left-0 right-0 bg-accent-purple rounded-t-sm transition-all group-hover:bg-accent-purple/80" style="${ssrRenderStyle({ height: "100%" })}"></div></div>`);
+      });
+      _push(`<!--]--></div></div><div class="w-full lg:w-48 p-6 rounded-xl bg-[#1a1625] border border-[#2a2435] flex flex-col justify-center"><div class="text-3xl font-bold text-white mb-1">TOP 1%</div><div class="text-xs text-text-muted mb-4">性能优化</div><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-text-muted">响应时间</span><span class="text-white">50ms</span></div><div class="flex justify-between"><span class="text-text-muted">吞吐量</span><span class="text-white">12.4k</span></div></div></div></div></section><section id="toolchain" class="scroll-mt-32"><h2 class="text-xl font-bold text-white mb-6">工具链</h2><div class="grid grid-cols-3 md:grid-cols-6 gap-4"><!--[-->`);
+      ssrRenderList(tools, (tool) => {
+        _push(`<div class="flex flex-col items-center gap-3 p-4 rounded-xl bg-[#1a1625] border border-[#2a2435] hover:border-[#4a4060] transition-all group cursor-pointer"><div class="w-10 h-10 flex items-center justify-center text-2xl">${ssrInterpolate(tool.icon)}</div><span class="text-xs text-text-secondary group-hover:text-white transition-colors">${ssrInterpolate(tool.name)}</span></div>`);
+      });
+      _push(`<!--]--></div></section><section id="experience" class="scroll-mt-32"><h2 class="text-xl font-bold text-white mb-6">职业经历</h2><div class="space-y-8 relative"><div class="absolute left-0 top-2 bottom-2 w-px bg-[#2a2435]"></div><!--[-->`);
+      ssrRenderList(experiences, (job) => {
+        _push(`<div class="relative pl-8"><div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-accent-purple -translate-x-1/2"></div><div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mb-2"><span class="text-xs text-text-muted">${ssrInterpolate(job.period)}</span><div class="flex items-center gap-2"><span class="text-white font-semibold">${ssrInterpolate(job.title)}</span><span class="text-text-muted">@</span><span class="text-accent-purple">${ssrInterpolate(job.company)}</span></div></div><p class="text-text-secondary text-sm leading-relaxed">${ssrInterpolate(job.description)}</p></div>`);
+      });
+      _push(`<!--]--></div></section><section id="contact" class="scroll-mt-32"><h2 class="text-xl font-bold text-white mb-6">发起联系</h2><div class="flex flex-col lg:flex-row gap-8"><div class="flex-1"><p class="text-text-secondary text-sm mb-6"> 寻找合作机会、技术咨询，或者只是想聊聊编译器理论？ </p><div class="space-y-3"><a href="mailto:hello@voidzero.dev" class="flex items-center gap-3 text-sm text-text-secondary hover:text-white transition-colors"><svg class="w-4 h-4 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg> hello@voidzero.dev </a><div class="flex items-center gap-3 text-sm text-text-secondary"><svg class="w-4 h-4 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 旧金山, 加州 </div></div><div class="flex items-center gap-3 mt-6"><!--[-->`);
+      ssrRenderList(socials, (social) => {
+        _push(`<a${ssrRenderAttr("href", social.link)} target="_blank" class="w-10 h-10 rounded-lg bg-[#1a1625] border border-[#2a2435] flex items-center justify-center text-text-secondary hover:text-white hover:border-[#4a4060] transition-all"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path${ssrRenderAttr("d", social.icon)}></path></svg></a>`);
+      });
+      _push(`<!--]--></div></div><div class="flex-1 p-6 rounded-xl bg-[#1a1625] border border-[#2a2435]"><div class="space-y-4"><div><label class="block text-xs text-text-muted mb-2">姓名</label><input type="text" class="w-full px-4 py-2.5 rounded-lg bg-[#231d2e] border border-[#2a2435] text-white text-sm focus:outline-none focus:border-[#4a4060] transition-colors" placeholder="你的名字"></div><div><label class="block text-xs text-text-muted mb-2">邮箱</label><input type="email" class="w-full px-4 py-2.5 rounded-lg bg-[#231d2e] border border-[#2a2435] text-white text-sm focus:outline-none focus:border-[#4a4060] transition-colors" placeholder="your@email.com"></div><div><label class="block text-xs text-text-muted mb-2">消息</label><textarea rows="4" class="w-full px-4 py-2.5 rounded-lg bg-[#231d2e] border border-[#2a2435] text-white text-sm focus:outline-none focus:border-[#4a4060] transition-colors resize-none" placeholder="你想说什么..."></textarea></div><button class="w-full py-3 rounded-lg bg-accent-purple text-white text-sm font-medium hover:bg-accent-purple/90 transition-all flex items-center justify-center gap-2"> 发送消息 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></button></div></div></div></section></div></div></div></div>`);
+    };
+  }
+};
+const _sfc_setup = _sfc_main.setup;
+_sfc_main.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("pages/about.vue");
+  return _sfc_setup ? _sfc_setup(props, ctx) : void 0;
+};
+
+export { _sfc_main as default };
+//# sourceMappingURL=about-CVUL6J0A.mjs.map

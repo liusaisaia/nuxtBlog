@@ -1,0 +1,228 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1774713913680,
+  "projectRoot": "/Volumes/data/Users/saisaia/Documents/study/nuxtBlog",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "nuxt",
+        "version": "4.3.1",
+        "category": "fullstack"
+      },
+      {
+        "name": "vue",
+        "version": "3.5.28",
+        "category": "frontend"
+      },
+      {
+        "name": "vitest",
+        "version": "4.0.18",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "pnpm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "pnpm build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "build": "node scripts/ensure-better-sqlite3.mjs && nuxt build",
+      "dev": "node scripts/ensure-better-sqlite3.mjs && nuxt dev",
+      "generate": "nuxt generate",
+      "preview": "node scripts/ensure-better-sqlite3.mjs && nuxt preview",
+      "postinstall": "nuxt prepare",
+      "lint:oxc": "oxlint .",
+      "db:generate": "drizzle-kit generate",
+      "db:migrate": "drizzle-kit migrate",
+      "db:push": "drizzle-kit push",
+      "db:studio": "drizzle-kit studio"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": true,
+    "workspaces": [],
+    "mainDirectories": [
+      "components",
+      "docs",
+      "pages",
+      "public",
+      "scripts",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "components": {
+      "path": "components",
+      "purpose": "UI components",
+      "fileCount": 11,
+      "lastAccessed": 1774713913655,
+      "keyFiles": [
+        "AppFooter.vue",
+        "AppHeader.vue",
+        "FeatureCard.vue",
+        "HeroSection.vue",
+        "PostCard.vue"
+      ]
+    },
+    "content": {
+      "path": "content",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1774713913660,
+      "keyFiles": []
+    },
+    "data": {
+      "path": "data",
+      "purpose": "Data files",
+      "fileCount": 1,
+      "lastAccessed": 1774713913661,
+      "keyFiles": [
+        "blog.db"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1774713913661,
+      "keyFiles": []
+    },
+    "layouts": {
+      "path": "layouts",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1774713913662,
+      "keyFiles": [
+        "admin.vue",
+        "default.vue"
+      ]
+    },
+    "middleware": {
+      "path": "middleware",
+      "purpose": "Middleware",
+      "fileCount": 1,
+      "lastAccessed": 1774713913662,
+      "keyFiles": [
+        "auth.ts"
+      ]
+    },
+    "pages": {
+      "path": "pages",
+      "purpose": "Page components",
+      "fileCount": 2,
+      "lastAccessed": 1774713913662,
+      "keyFiles": [
+        "about.vue",
+        "index.vue"
+      ]
+    },
+    "plugins": {
+      "path": "plugins",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1774713913662,
+      "keyFiles": [
+        "color-mode-default.client.ts"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1774713913662,
+      "keyFiles": []
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 2,
+      "lastAccessed": 1774713913662,
+      "keyFiles": [
+        "ensure-better-sqlite3.mjs",
+        "seed-admin.ts"
+      ]
+    },
+    "server": {
+      "path": "server",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1774713913663,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1774713913663,
+      "keyFiles": []
+    },
+    "server/api": {
+      "path": "server/api",
+      "purpose": "API routes",
+      "fileCount": 0,
+      "lastAccessed": 1774713913664,
+      "keyFiles": []
+    },
+    "server/routes": {
+      "path": "server/routes",
+      "purpose": "Route handlers",
+      "fileCount": 1,
+      "lastAccessed": 1774713913664,
+      "keyFiles": [
+        "rss.xml.ts"
+      ]
+    },
+    "server/utils": {
+      "path": "server/utils",
+      "purpose": "Utility functions",
+      "fileCount": 1,
+      "lastAccessed": 1774713913665,
+      "keyFiles": [
+        "auth.ts"
+      ]
+    },
+    "tests/components": {
+      "path": "tests/components",
+      "purpose": "UI components",
+      "fileCount": 1,
+      "lastAccessed": 1774713913665,
+      "keyFiles": [
+        "AppFooter.nuxt.spec.ts"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}
