@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1774713913680,
+  "lastScanned": 1774834393152,
   "projectRoot": "/Volumes/data/Users/saisaia/Documents/study/nuxtBlog",
   "techStack": {
     "languages": [
@@ -87,7 +87,7 @@
       "path": "components",
       "purpose": "UI components",
       "fileCount": 11,
-      "lastAccessed": 1774713913655,
+      "lastAccessed": 1774834393126,
       "keyFiles": [
         "AppFooter.vue",
         "AppHeader.vue",
@@ -100,14 +100,14 @@
       "path": "content",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1774713913660,
+      "lastAccessed": 1774834393127,
       "keyFiles": []
     },
     "data": {
       "path": "data",
       "purpose": "Data files",
       "fileCount": 1,
-      "lastAccessed": 1774713913661,
+      "lastAccessed": 1774834393127,
       "keyFiles": [
         "blog.db"
       ]
@@ -116,14 +116,14 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1774713913661,
+      "lastAccessed": 1774834393135,
       "keyFiles": []
     },
     "layouts": {
       "path": "layouts",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1774713913662,
+      "lastAccessed": 1774834393136,
       "keyFiles": [
         "admin.vue",
         "default.vue"
@@ -132,9 +132,10 @@
     "middleware": {
       "path": "middleware",
       "purpose": "Middleware",
-      "fileCount": 1,
-      "lastAccessed": 1774713913662,
+      "fileCount": 2,
+      "lastAccessed": 1774834393136,
       "keyFiles": [
+        "admin-auth.global.ts",
         "auth.ts"
       ]
     },
@@ -142,7 +143,7 @@
       "path": "pages",
       "purpose": "Page components",
       "fileCount": 2,
-      "lastAccessed": 1774713913662,
+      "lastAccessed": 1774834393137,
       "keyFiles": [
         "about.vue",
         "index.vue"
@@ -152,7 +153,7 @@
       "path": "plugins",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1774713913662,
+      "lastAccessed": 1774834393137,
       "keyFiles": [
         "color-mode-default.client.ts"
       ]
@@ -161,45 +162,55 @@
       "path": "public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1774713913662,
+      "lastAccessed": 1774834393139,
       "keyFiles": []
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 2,
-      "lastAccessed": 1774713913662,
+      "fileCount": 3,
+      "lastAccessed": 1774834393140,
       "keyFiles": [
         "ensure-better-sqlite3.mjs",
-        "seed-admin.ts"
+        "seed-admin.ts",
+        "turso-init.mjs"
       ]
     },
     "server": {
       "path": "server",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1774713913663,
+      "lastAccessed": 1774834393142,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 0,
-      "lastAccessed": 1774713913663,
+      "lastAccessed": 1774834393142,
       "keyFiles": []
     },
     "server/api": {
       "path": "server/api",
       "purpose": "API routes",
       "fileCount": 0,
-      "lastAccessed": 1774713913664,
+      "lastAccessed": 1774834393144,
       "keyFiles": []
+    },
+    "server/middleware": {
+      "path": "server/middleware",
+      "purpose": "Middleware",
+      "fileCount": 1,
+      "lastAccessed": 1774834393144,
+      "keyFiles": [
+        "admin-auth.ts"
+      ]
     },
     "server/routes": {
       "path": "server/routes",
       "purpose": "Route handlers",
       "fileCount": 1,
-      "lastAccessed": 1774713913664,
+      "lastAccessed": 1774834393144,
       "keyFiles": [
         "rss.xml.ts"
       ]
@@ -207,17 +218,18 @@
     "server/utils": {
       "path": "server/utils",
       "purpose": "Utility functions",
-      "fileCount": 1,
-      "lastAccessed": 1774713913665,
+      "fileCount": 2,
+      "lastAccessed": 1774834393144,
       "keyFiles": [
-        "auth.ts"
+        "auth.ts",
+        "login-rate-limit.ts"
       ]
     },
     "tests/components": {
       "path": "tests/components",
       "purpose": "UI components",
       "fileCount": 1,
-      "lastAccessed": 1774713913665,
+      "lastAccessed": 1774834393144,
       "keyFiles": [
         "AppFooter.nuxt.spec.ts"
       ]

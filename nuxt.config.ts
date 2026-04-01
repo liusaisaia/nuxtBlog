@@ -15,9 +15,12 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts', // Google Fonts 优化加载
     '@pinia/nuxt',         // 状态管理
     '@nuxt/image',         // 图片优化
+    // '@vueuse/motion/nuxt',  // 动画库 (暂时禁用)
     // '@nuxtjs/seo',      // SEO 优化 (暂时禁用)
     '@nuxtjs/color-mode'   // 颜色模式 (深色/浅色)
   ],
+
+
 
   // Google Fonts 配置
   googleFonts: {
@@ -58,5 +61,5 @@ export default defineNuxtConfig({
   // 图片优化配置
   image: {
     domains: ['api.dicebear.com'],
-  }
+  },
 })

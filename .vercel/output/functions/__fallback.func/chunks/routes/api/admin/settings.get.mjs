@@ -1,6 +1,4 @@
-import { d as defineEventHandler } from '../../../nitro/nitro.mjs';
-import { d as db, s as settings } from '../../../_/index.mjs';
-import 'jose';
+import { d as defineEventHandler, a as db, s as settings } from '../../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -8,13 +6,14 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
+import 'drizzle-orm/libsql';
+import 'drizzle-orm';
+import '@libsql/client';
+import 'drizzle-orm/sqlite-core';
+import 'jose';
 import 'better-sqlite3';
 import 'node:url';
 import 'ipx';
-import 'drizzle-orm/libsql';
-import '@libsql/client';
-import 'drizzle-orm/sqlite-core';
-import 'drizzle-orm';
 
 const settings_get = defineEventHandler(async () => {
   const allSettings = await db.select().from(settings);

@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
 
   const content = fileField.data.toString('utf-8')
   const filename = fileField.filename || 'untitled.md'
+  const lowerName = filename.toLowerCase()
 
   // Parse frontmatter
   let title = filename.replace('.md', '')
@@ -38,20 +39,49 @@ export default defineEventHandler(async (event) => {
   const categoryId: number | undefined = undefined
   let coverImage = ''
 
-  try {
-    const parsed = matter(content)
-    postContent = parsed.content
-    title = parsed.data.title || title
-    excerpt = parsed.data.excerpt || ''
-    coverImage = parsed.data.cover || ''
-    
-    if (parsed.data.category) {
-      // TODO: Look up category by name/slug
+  // JSON import: support common structures exported by note apps.
+  if (lowerName.endsWith('.json')) {
+    try {
+      const parsedJson = JSON.parse(content)
+      const source = Array.isArray(parsedJson) ? parsedJson[0] : parsedJson
+      if (!source || typeof source !== 'object') {
+        throw new Error('Invalid JSON format')
+      }
+
+      title =
+        source.title ||
+        source.name ||
+        source.subject ||
+        filename.replace('.json', '') ||
+        'untitled'
+
+      postContent =
+        source.content ||
+        source.markdown ||
+        source.body ||
+        source.text ||
+        ''
+
+      excerpt = source.excerpt || source.summary || ''
+      coverImage = source.cover || source.coverImage || source.thumbnail || ''
+    } catch {
+      throw createError({ statusCode: 400, message: 'JSON 解析失败，请检查文件格式' })
     }
-    
-  } catch {
-    // If parsing fails, use the whole content
-    postContent = content
+  } else {
+    try {
+      const parsed = matter(content)
+      postContent = parsed.content
+      title = parsed.data.title || title
+      excerpt = parsed.data.excerpt || ''
+      coverImage = parsed.data.cover || ''
+
+      if (parsed.data.category) {
+        // TODO: Look up category by name/slug
+      }
+    } catch {
+      // If parsing fails, use the whole content
+      postContent = content
+    }
   }
 
   // Generate slug from title

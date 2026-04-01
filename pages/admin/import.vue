@@ -51,59 +51,66 @@ async function uploadFile() {
 <template>
   <div>
     <div class="mb-6">
-      <h1 class="text-2xl font-bold">导入文档</h1>
-      <p class="text-gray-600 mt-1">从 Markdown 文件导入文章</p>
+      <div class="text-xs text-text-muted light:text-gray-500 uppercase tracking-wider mb-2">导入中心</div>
+      <h1 class="text-2xl font-bold text-white light:text-gray-900">导入文档</h1>
+      <p class="text-text-secondary light:text-gray-600 mt-1">支持 Markdown / JSON 导入文章或笔记</p>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-[#15121a] dark:bg-[#15121a] light:bg-white rounded-xl border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 p-6 shadow-card">
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          选择 Markdown 文件
+        <label class="block text-sm font-medium text-white light:text-gray-800 mb-2">
+          选择导入文件
         </label>
         <input
           type="file"
-          accept=".md,.markdown"
+          accept=".md,.markdown,.json"
           @change="handleFileChange"
-          class="block w-full text-sm text-gray-500
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
+          class="block w-full text-sm text-text-muted light:text-gray-500
+            file:mr-4 file:py-2.5 file:px-4
+            file:rounded-lg file:border file:border-[#2a2435] dark:file:border-[#2a2435] light:file:border-gray-200
             file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700
-            hover:file:bg-blue-100"
+            file:bg-accent-purple/15 file:text-accent-purple
+            hover:file:bg-accent-purple/25"
         >
       </div>
 
-      <p class="text-sm text-gray-500 mb-4">
+      <p class="text-sm text-text-secondary light:text-gray-600 mb-5 leading-relaxed">
         支持语雀导出的 Markdown 文件<br>
-        支持 frontmatter：title, tags, category, excerpt, cover
+        支持 JSON / frontmatter 字段：title, tags, category, excerpt, cover
       </p>
 
       <button
         @click="uploadFile"
         :disabled="uploading || !file"
-        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-5 py-2.5 bg-accent-purple text-white rounded-lg hover:bg-accent-purple/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2 hover:shadow-lg hover:shadow-accent-purple/25"
       >
-        {{ uploading ? '导入中...' : '导入' }}
+        <svg v-if="uploading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        {{ uploading ? '导入中...' : '开始导入' }}
       </button>
 
       <div
         v-if="message"
         :class="[
-          'mt-4 p-3 rounded-md',
-          messageType === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+          'mt-4 p-3 rounded-lg border text-sm',
+          messageType === 'success'
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 light:bg-emerald-50 light:text-emerald-700 light:border-emerald-200'
+            : 'bg-rose-500/10 border-rose-500/30 text-rose-300 light:bg-rose-50 light:text-rose-700 light:border-rose-200'
         ]"
       >
         {{ message }}
       </div>
 
-      <div v-if="importedPost" class="mt-4 p-4 bg-blue-50 rounded-md">
-        <p class="font-medium">导入的文章：</p>
-        <p class="text-lg font-semibold mt-1">{{ importedPost.title }}</p>
-        <p class="text-sm text-gray-600 mt-1">Slug: {{ importedPost.slug }}</p>
-        <p class="text-sm text-gray-600 mt-1">状态: {{ importedPost.status }}</p>
+      <div v-if="importedPost" class="mt-4 p-4 bg-accent-purple/10 border border-accent-purple/25 rounded-lg">
+        <p class="font-medium text-white light:text-gray-900">导入完成：</p>
+        <p class="text-lg font-semibold mt-1 text-white light:text-gray-900">{{ importedPost.title }}</p>
+        <p class="text-sm text-text-secondary light:text-gray-600 mt-1">路径标识: {{ importedPost.slug }}</p>
+        <p class="text-sm text-text-secondary light:text-gray-600 mt-1">状态: {{ importedPost.status }}</p>
         <NuxtLink
           :to="`/admin/posts/${importedPost.id}`"
-          class="inline-block mt-3 text-blue-600 hover:underline"
+          class="inline-flex mt-3 text-accent-purple hover:opacity-80 font-medium"
         >
           编辑文章 →
         </NuxtLink>

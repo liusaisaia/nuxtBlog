@@ -8,11 +8,9 @@
         <div class="relative reveal-stagger">
           <p class="text-xs tracking-[0.2em] uppercase text-mute">Tech Reading Editorial</p>
           <h1 class="mt-3 text-4xl md:text-6xl font-semibold tracking-tight max-w-4xl leading-[1.05]">
-            为技术博客读者构建
-            <span
-              class="headline-typewriter headline-art"
-              style="--type-ch: 8; --type-steps: 8;"
-            >沉浸式阅读界面</span>
+            <transition name="mask">
+              <span class="block">为技术博客读者构建 沉浸式阅读界面</span>
+            </transition>
           </h1>
           <p class="text-soft mt-5 max-w-2xl text-base md:text-lg leading-relaxed">
             聚焦架构、性能与工程实践。通过分层动效和更清晰的信息结构，让读者更快进入正文、更久停留在文章深处。
@@ -99,12 +97,45 @@
 <script setup lang="ts">
 import { BookText, Tags } from 'lucide-vue-next'
 
-const { data: posts } = await useAsyncData('home-posts', () =>
-  queryCollection('content')
-    .order('date', 'DESC')
-    .select('title', 'description', 'date', 'tags', 'path', 'readingTime')
-    .all(),
-)
+interface Post {
+  id: number
+  title: string
+  slug: string
+  excerpt?: string | null
+  coverImage?: string | null
+  isFeatured?: boolean
+  isSticky?: boolean
+  viewCount?: number
+  publishedAt?: string | null
+  createdAt?: string | null
+  date?: string
+  category?: {
+    id?: number
+    name?: string | null
+    slug?: string | null
+    color?: string | null
+  } | null
+  tags?: Array<{
+    id?: number
+    name?: string | null
+    slug?: string | null
+    color?: string | null
+  }>
+  path: string
+  description?: string | null
+  readingTime?: string
+}
+
+const { data: postsData } = await useFetch('/api/posts', {
+  query: { pageSize: 20 }
+})
+
+const posts = computed<Post[]>(() => (postsData.value?.list || []).map(post => ({
+  ...post,
+  path: `/posts/${post.slug}`,
+  description: post.excerpt,
+  readingTime: '8 分钟阅读'
+})))
 
 const featuredPost = computed(() => posts.value?.[0] || null)
 const sidePosts = computed(() => posts.value?.slice(1, 4) || [])
@@ -114,7 +145,9 @@ const topTopics = computed(() => {
   const map = new Map<string, number>()
   for (const post of posts.value || []) {
     for (const tag of post.tags || []) {
-      map.set(tag, (map.get(tag) || 0) + 1)
+      if (tag.name) {
+        map.set(tag.name, (map.get(tag.name) || 0) + 1)
+      }
     }
   }
   return [...map.entries()]
@@ -140,3 +173,20 @@ useHead({
   ],
 })
 </script>
+
+<style scoped>
+.mask-enter-active {
+  animation: mask-enter 1.5s ease-out forwards;
+}
+
+@keyframes mask-enter {
+  0% {
+    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    opacity: 1;
+  }
+}
+</style>

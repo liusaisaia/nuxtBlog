@@ -1,11 +1,11 @@
 <template>
   <div class="pt-24 min-h-screen">
-    <div class="max-w-page mx-auto px-8 pb-20">
+    <div class="container-page pb-20">
       <div class="flex gap-12">
         <!-- 左侧边栏 - 目录 -->
         <aside class="w-56 flex-shrink-0 hidden lg:block">
           <div class="sticky top-24">
-            <h3 class="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
+            <h3 class="text-xs font-semibold text-mute mb-4 uppercase tracking-wider">
               目录
             </h3>
             <nav class="space-y-1">
@@ -14,11 +14,11 @@
                 :key="item.id"
                 :href="`#${item.id}`"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all group"
-                :class="activeSection === item.id ? 'text-accent-purple bg-accent-purple/10' : 'text-text-secondary hover:text-white'"
+                :class="activeSection === item.id ? 'text-[var(--brand)] bg-[var(--brand-soft)]' : 'text-soft hover:text-[var(--text)]'"
               >
                 <span
                   class="w-1.5 h-1.5 rounded-full transition-colors"
-                  :class="activeSection === item.id ? 'bg-accent-purple' : 'bg-text-muted group-hover:bg-text-secondary'"
+                  :class="activeSection === item.id ? 'bg-[var(--brand)]' : 'bg-[var(--text-mute)] group-hover:bg-[var(--text-soft)]'"
                 />
                 <span>{{ item.text }}</span>
               </a>
@@ -32,7 +32,7 @@
           <section id="profile" class="scroll-mt-32">
             <div class="flex flex-col md:flex-row gap-8 items-start">
               <!-- 头像 -->
-              <div class="w-40 h-48 rounded-xl bg-gradient-to-br from-[#2a2435] to-[#1a1625] flex-shrink-0 overflow-hidden border border-[#3a3445]">
+              <div class="w-40 h-48 rounded-xl bg-[var(--bg-soft)] flex-shrink-0 overflow-hidden border border-soft">
                 <img
                   src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
                   alt="头像"
@@ -42,21 +42,21 @@
 
               <!-- 介绍 -->
               <div class="flex-1">
-                <div class="text-xs text-text-muted uppercase tracking-wider mb-2">
+                <div class="text-xs text-mute uppercase tracking-wider mb-2">
                   系统架构师 & 高级开发者
                 </div>
-                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                <h1 class="text-4xl md:text-5xl font-bold text-[var(--text)] mb-4 leading-tight">
                   我为现代 Web<br>
-                  <span class="text-accent-purple">构建工具。</span>
+                  <span class="text-[var(--brand)]">构建工具。</span>
                 </h1>
-                <p class="text-text-secondary leading-relaxed mb-6 max-w-xl">
+                <p class="text-soft leading-relaxed mb-6 max-w-xl">
                   扎根于高性能工程与直观设计的交汇处。目前专注于在 VOIDZERO 构建超快工具链。我相信"整体编辑器"理念——软件应该像一个精密仪器。
                 </p>
                 <div class="flex items-center gap-4">
-                  <button class="px-5 py-2.5 rounded-lg bg-accent-purple text-white text-sm font-medium hover:bg-accent-purple/90 transition-all">
+                  <button class="px-5 py-2.5 rounded-lg bg-[var(--brand)] text-white text-sm font-medium hover:opacity-90 transition-all">
                     下载简历
                   </button>
-                  <button class="px-5 py-2.5 rounded-lg bg-[#1a1625] text-white text-sm font-medium border border-[#2a2435] hover:border-[#4a4060] transition-all">
+                  <button class="px-5 py-2.5 rounded-lg surface text-[var(--text)] text-sm font-medium hover:border-strong transition-all">
                     查看项目
                   </button>
                 </div>
@@ -66,16 +66,16 @@
 
           <!-- 系统性能 -->
           <section id="performance" class="scroll-mt-32">
-            <h2 class="text-xl font-bold text-white mb-6">系统性能</h2>
+            <h2 class="text-xl font-bold text-[var(--text)] mb-6">系统性能</h2>
             <div class="flex flex-col lg:flex-row gap-6">
               <!-- 性能图表 -->
-              <div class="flex-1 p-6 rounded-xl bg-[#1a1625] border border-[#2a2435]">
+              <div class="flex-1 p-6 rounded-xl surface">
                 <div class="flex items-center justify-between mb-4">
-                  <span class="text-xs text-text-muted">性能指标概览</span>
+                  <span class="text-xs text-mute">性能指标概览</span>
                   <div class="flex items-center gap-4 text-xs">
-                    <span class="text-text-muted">2022</span>
-                    <span class="text-accent-purple">2023</span>
-                    <span class="text-text-muted">2024</span>
+                    <span class="text-mute">2022</span>
+                    <span class="text-[var(--brand)]">2023</span>
+                    <span class="text-mute">2024</span>
                   </div>
                 </div>
                 <!-- 柱状图 -->
@@ -83,11 +83,11 @@
                   <div
                     v-for="(bar, index) in performanceBars"
                     :key="index"
-                    class="flex-1 bg-accent-purple/20 rounded-t-sm relative group"
+                    class="flex-1 bg-[var(--brand-soft)] rounded-t-sm relative group"
                     :style="{ height: `${bar.value}%` }"
                   >
                     <div
-                      class="absolute bottom-0 left-0 right-0 bg-accent-purple rounded-t-sm transition-all group-hover:bg-accent-purple/80"
+                      class="absolute bottom-0 left-0 right-0 bg-[var(--brand)] rounded-t-sm transition-all group-hover:opacity-80"
                       :style="{ height: '100%' }"
                     />
                   </div>
@@ -95,17 +95,17 @@
               </div>
 
               <!-- TOP 1% 卡片 -->
-              <div class="w-full lg:w-48 p-6 rounded-xl bg-[#1a1625] border border-[#2a2435] flex flex-col justify-center">
-                <div class="text-3xl font-bold text-white mb-1">TOP 1%</div>
-                <div class="text-xs text-text-muted mb-4">性能优化</div>
+              <div class="w-full lg:w-48 p-6 rounded-xl surface flex flex-col justify-center">
+                <div class="text-3xl font-bold text-[var(--text)] mb-1">TOP 1%</div>
+                <div class="text-xs text-mute mb-4">性能优化</div>
                 <div class="space-y-2 text-xs">
                   <div class="flex justify-between">
-                    <span class="text-text-muted">响应时间</span>
-                    <span class="text-white">50ms</span>
+                    <span class="text-mute">响应时间</span>
+                    <span class="text-[var(--text)]">50ms</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-text-muted">吞吐量</span>
-                    <span class="text-white">12.4k</span>
+                    <span class="text-mute">吞吐量</span>
+                    <span class="text-[var(--text)]">12.4k</span>
                   </div>
                 </div>
               </div>
@@ -114,27 +114,27 @@
 
           <!-- 工具链 -->
           <section id="toolchain" class="scroll-mt-32">
-            <h2 class="text-xl font-bold text-white mb-6">工具链</h2>
+            <h2 class="text-xl font-bold text-[var(--text)] mb-6">工具链</h2>
             <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
               <div
                 v-for="tool in tools"
                 :key="tool.name"
-                class="flex flex-col items-center gap-3 p-4 rounded-xl bg-[#1a1625] border border-[#2a2435] hover:border-[#4a4060] transition-all group cursor-pointer"
+                class="flex flex-col items-center gap-3 p-4 rounded-xl surface hover:border-strong transition-all group cursor-pointer"
               >
                 <div class="w-10 h-10 flex items-center justify-center text-2xl">
                   {{ tool.icon }}
                 </div>
-                <span class="text-xs text-text-secondary group-hover:text-white transition-colors">{{ tool.name }}</span>
+                <span class="text-xs text-soft group-hover:text-[var(--text)] transition-colors">{{ tool.name }}</span>
               </div>
             </div>
           </section>
 
           <!-- 职业经历 -->
           <section id="experience" class="scroll-mt-32">
-            <h2 class="text-xl font-bold text-white mb-6">职业经历</h2>
+            <h2 class="text-xl font-bold text-[var(--text)] mb-6">职业经历</h2>
             <div class="space-y-8 relative">
               <!-- 时间线 -->
-              <div class="absolute left-0 top-2 bottom-2 w-px bg-[#2a2435]" />
+              <div class="absolute left-0 top-2 bottom-2 w-px bg-[var(--line)]" />
 
               <div
                 v-for="job in experiences"
@@ -142,17 +142,17 @@
                 class="relative pl-8"
               >
                 <!-- 时间点 -->
-                <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-accent-purple -translate-x-1/2" />
+                <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-[var(--brand)] -translate-x-1/2" />
 
                 <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mb-2">
-                  <span class="text-xs text-text-muted">{{ job.period }}</span>
+                  <span class="text-xs text-mute">{{ job.period }}</span>
                   <div class="flex items-center gap-2">
-                    <span class="text-white font-semibold">{{ job.title }}</span>
-                    <span class="text-text-muted">@</span>
-                    <span class="text-accent-purple">{{ job.company }}</span>
+                    <span class="text-[var(--text)] font-semibold">{{ job.title }}</span>
+                    <span class="text-mute">@</span>
+                    <span class="text-[var(--brand)]">{{ job.company }}</span>
                   </div>
                 </div>
-                <p class="text-text-secondary text-sm leading-relaxed">
+                <p class="text-soft text-sm leading-relaxed">
                   {{ job.description }}
                 </p>
               </div>
@@ -161,25 +161,25 @@
 
           <!-- 发起联系 -->
           <section id="contact" class="scroll-mt-32">
-            <h2 class="text-xl font-bold text-white mb-6">发起联系</h2>
+            <h2 class="text-xl font-bold text-[var(--text)] mb-6">发起联系</h2>
             <div class="flex flex-col lg:flex-row gap-8">
               <!-- 联系信息 -->
               <div class="flex-1">
-                <p class="text-text-secondary text-sm mb-6">
+                <p class="text-soft text-sm mb-6">
                   寻找合作机会、技术咨询，或者只是想聊聊编译器理论？
                 </p>
                 <div class="space-y-3">
                   <a
                     href="mailto:hello@voidzero.dev"
-                    class="flex items-center gap-3 text-sm text-text-secondary hover:text-white transition-colors"
+                    class="flex items-center gap-3 text-sm text-soft hover:text-[var(--text)] transition-colors"
                   >
-                    <svg class="w-4 h-4 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-[var(--brand)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     hello@voidzero.dev
                   </a>
-                  <div class="flex items-center gap-3 text-sm text-text-secondary">
-                    <svg class="w-4 h-4 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="flex items-center gap-3 text-sm text-soft">
+                    <svg class="w-4 h-4 text-[var(--brand)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -194,7 +194,7 @@
                     :key="social.name"
                     :href="social.link"
                     target="_blank"
-                    class="w-10 h-10 rounded-lg bg-[#1a1625] border border-[#2a2435] flex items-center justify-center text-text-secondary hover:text-white hover:border-[#4a4060] transition-all"
+                    class="w-10 h-10 rounded-lg surface flex items-center justify-center text-soft hover:text-[var(--text)] hover:border-strong transition-all"
                   >
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path :d="social.icon" />
@@ -204,33 +204,33 @@
               </div>
 
               <!-- 联系表单 -->
-              <div class="flex-1 p-6 rounded-xl bg-[#1a1625] border border-[#2a2435]">
+              <div class="flex-1 p-6 rounded-xl surface">
                 <div class="space-y-4">
                   <div>
-                    <label class="block text-xs text-text-muted mb-2">姓名</label>
+                    <label class="block text-xs text-mute mb-2">姓名</label>
                     <input
                       type="text"
-                      class="w-full px-4 py-2.5 rounded-lg bg-[#231d2e] border border-[#2a2435] text-white text-sm focus:outline-none focus:border-[#4a4060] transition-colors"
+                      class="w-full px-4 py-2.5 rounded-lg bg-[var(--bg-soft)] border border-soft text-[var(--text)] text-sm focus:outline-none focus:border-[var(--brand)] transition-colors"
                       placeholder="你的名字"
                     >
                   </div>
                   <div>
-                    <label class="block text-xs text-text-muted mb-2">邮箱</label>
+                    <label class="block text-xs text-mute mb-2">邮箱</label>
                     <input
                       type="email"
-                      class="w-full px-4 py-2.5 rounded-lg bg-[#231d2e] border border-[#2a2435] text-white text-sm focus:outline-none focus:border-[#4a4060] transition-colors"
+                      class="w-full px-4 py-2.5 rounded-lg bg-[var(--bg-soft)] border border-soft text-[var(--text)] text-sm focus:outline-none focus:border-[var(--brand)] transition-colors"
                       placeholder="your@email.com"
                     >
                   </div>
                   <div>
-                    <label class="block text-xs text-text-muted mb-2">消息</label>
+                    <label class="block text-xs text-mute mb-2">消息</label>
                     <textarea
                       rows="4"
-                      class="w-full px-4 py-2.5 rounded-lg bg-[#231d2e] border border-[#2a2435] text-white text-sm focus:outline-none focus:border-[#4a4060] transition-colors resize-none"
+                      class="w-full px-4 py-2.5 rounded-lg bg-[var(--bg-soft)] border border-soft text-[var(--text)] text-sm focus:outline-none focus:border-[var(--brand)] transition-colors resize-none"
                       placeholder="你想说什么..."
                     />
                   </div>
-                  <button class="w-full py-3 rounded-lg bg-accent-purple text-white text-sm font-medium hover:bg-accent-purple/90 transition-all flex items-center justify-center gap-2">
+                  <button class="w-full py-3 rounded-lg bg-[var(--brand)] text-white text-sm font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2">
                     发送消息
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

@@ -7,8 +7,8 @@
     <header class="pt-8 md:pt-14">
       <div class="surface-strong rounded-3xl p-6 md:p-10 motion-rise">
         <div class="flex flex-wrap items-center gap-2 text-xs mb-4">
-          <span v-for="tag in doc?.tags || []" :key="tag" class="brand-chip rounded-full px-2.5 py-1">{{ tag }}</span>
-          <span class="text-mute">{{ doc?.readingTime || '8 分钟阅读' }}</span>
+          <span v-for="tag in doc?.tags || []" :key="tag.id" class="brand-chip rounded-full px-2.5 py-1">{{ tag.name }}</span>
+          <span class="text-mute">8 分钟阅读</span>
         </div>
 
         <h1 class="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] max-w-4xl">
@@ -22,7 +22,7 @@
           </span>
           <span class="inline-flex items-center gap-1.5">
             <UserRound class="w-4 h-4" :stroke-width="1.9" aria-hidden="true" />
-            作者：{{ doc?.author || 'Void Notes' }}
+            作者：Void Notes
           </span>
           <span class="inline-flex items-center gap-1.5">
             <Gauge class="w-4 h-4" :stroke-width="1.9" aria-hidden="true" />
@@ -33,26 +33,12 @@
     </header>
 
     <div class="mt-8 grid grid-cols-1 xl:grid-cols-12 2xl:grid-cols-14 gap-5 xl:gap-6">
-      <aside class="2xl:col-span-3 hidden 2xl:block">
-        <div class="surface rounded-2xl p-4 sticky top-24">
-          <p class="text-xs uppercase tracking-[0.2em] text-mute mb-3">目录</p>
-          <nav class="space-y-1.5 max-h-[65vh] overflow-auto pr-1">
-            <a
-              v-for="item in headings"
-              :key="item.id"
-              :href="`#${item.id}`"
-              class="block px-3 py-2 rounded-lg text-sm transition-colors"
-              :class="activeHeadingId === item.id ? 'brand-chip font-medium' : 'text-soft hover:text-[var(--text)] hover:bg-[var(--brand-soft)]'"
-            >
-              {{ item.text }}
-            </a>
-          </nav>
-        </div>
-      </aside>
-
       <div class="xl:col-span-8 2xl:col-span-7">
         <div class="surface-strong rounded-3xl p-6 md:p-8">
-          <ContentRenderer :value="docValue" class="prose prose-lg article-prose max-w-none" />
+          <div 
+            class="prose prose-lg article-prose max-w-none" 
+            v-html="doc?.content"
+          />
         </div>
       </div>
 
@@ -62,7 +48,7 @@
           <div class="space-y-2.5">
             <NuxtLink
               v-for="post in relatedPosts"
-              :key="post.path"
+              :key="post.id"
               :to="post.path"
               class="block rounded-xl border border-soft p-3 hover:border-strong transition-colors"
             >
@@ -96,24 +82,58 @@ import { CalendarDays, Gauge, UserRound } from 'lucide-vue-next'
 
 const route = useRoute()
 
-const { data: doc } = await useAsyncData(`content-${route.path}`, () =>
-  queryCollection('content').path(route.path).first(),
-)
+interface Post {
+  id: number
+  title: string
+  slug: string
+  content?: string | null
+  excerpt?: string | null
+  coverImage?: string | null
+  isFeatured?: boolean
+  isSticky?: boolean
+  viewCount?: number
+  publishedAt?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
+  date?: string
+  category?: {
+    id?: number
+    name?: string | null
+    slug?: string | null
+    color?: string | null
+  } | null
+  tags?: Array<{
+    id?: number
+    name?: string | null
+    slug?: string | null
+    color?: string | null
+  }>
+  path: string
+  description?: string | null
+}
 
-if (doc.value == null) {
+const slug = computed(() => route.params.slug as string[])
+const slugStr = computed(() => slug.value.join('/'))
+
+const { data: doc } = await useFetch(`/api/posts/${slugStr.value}`)
+
+if (!doc.value) {
   throw createError({ statusCode: 404, statusMessage: '文章不存在' })
 }
 
-const { data: allPosts } = await useAsyncData('all-content-posts', () =>
-  queryCollection('content')
-    .order('date', 'DESC')
-    .select('title', 'path', 'date', 'tags')
-    .all(),
-)
+const { data: postsData } = await useFetch('/api/posts', {
+  query: { pageSize: 100 }
+})
+
+const allPosts = computed<Post[]>(() => (postsData.value?.list || []).map(post => ({
+  ...post,
+  path: `/posts/${post.slug}`,
+  description: post.excerpt
+})))
 
 const surround = computed(() => {
   const posts = allPosts.value || []
-  const index = posts.findIndex(p => p.path === route.path)
+  const index = posts.findIndex(p => p.slug === slugStr.value)
   if (index < 0) return [null, null]
   return [posts[index + 1] || null, posts[index - 1] || null]
 })
@@ -123,28 +143,12 @@ const next = computed(() => surround.value[1])
 
 const relatedPosts = computed(() => {
   const current = doc.value
-  if (current == null) return []
-  const tags = new Set(current.tags || [])
+  if (!current) return []
+  const currentTagIds = new Set((current.tags || []).map(t => t.id))
   return (allPosts.value || [])
-    .filter((post) => post.path !== current.path)
-    .filter((post) => (post.tags || []).some(tag => tags.has(tag)))
+    .filter((post) => post.slug !== slugStr.value)
+    .filter((post) => (post.tags || []).some(tag => currentTagIds.has(tag.id)))
     .slice(0, 4)
-})
-
-const docValue = computed(() => doc.value || {})
-
-const headings = computed(() => {
-  const links = doc.value?.body?.toc?.links || []
-  const flat: Array<{ id: string; text: string }> = []
-
-  for (const link of links) {
-    if (link.id && link.text) flat.push({ id: link.id, text: link.text })
-    for (const child of link.children || []) {
-      if (child.id && child.text) flat.push({ id: child.id, text: `- ${child.text}` })
-    }
-  }
-
-  return flat
 })
 
 const activeHeadingId = ref('')
@@ -161,31 +165,11 @@ onMounted(() => {
     progress.value = Math.min(100, Math.max(0, (window.scrollY / total) * 100))
   }
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting && entry.target.id) {
-          activeHeadingId.value = entry.target.id
-        }
-      }
-    },
-    { rootMargin: '-22% 0px -62% 0px' },
-  )
-
-  const bindHeadings = () => {
-    for (const item of headings.value) {
-      const element = document.getElementById(item.id)
-      if (element) observer.observe(element)
-    }
-  }
-
-  bindHeadings()
   updateProgress()
 
   window.addEventListener('scroll', updateProgress, { passive: true })
   detachHeadingObserver = () => {
     window.removeEventListener('scroll', updateProgress)
-    observer.disconnect()
   }
 })
 
@@ -208,7 +192,7 @@ useHead(() => ({
   meta: [
     {
       name: 'description',
-      content: doc.value?.description || '技术博客文章阅读页。',
+      content: doc.value?.excerpt || '技术博客文章阅读页。',
     },
   ],
 }))

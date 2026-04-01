@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"brew upgrade claude\",\"description\":\"使用 Homebrew 升级 Claude\"}",
-  "error": "Exit code 1\n==> Auto-updating Homebrew...\nAdjust how often this is run with `$HOMEBREW_AUTO_UPDATE_SECS` or disable with\n`$HOMEBREW_NO_AUTO_UPDATE=1`. Hide these hints with `$HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).\n==> Auto-updated Homebrew!\nUpdated 5 taps (x6nux/zedg, homebrew/autoupdate, anomalyco/tap, homebrew/core and homebrew/cask).\n==> New Formulae\ncrip: Tool to extract server certificates\ndispenso: High-performance C++ library for parallel programming\njsongrep: Path query language over...",
-  "timestamp": "2026-03-28T16:07:18.661Z",
-  "retry_count": 1
-}

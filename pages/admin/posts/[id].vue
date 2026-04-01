@@ -1,7 +1,11 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'admin',
+})
+
 const route = useRoute()
 const router = useRouter()
-const isNew = route.params.id === 'new'
+const isNew = computed(() => route.params.id === 'new')
 
 const title = ref('')
 const content = ref('')
@@ -17,21 +21,26 @@ const uploadingCover = ref(false)
 const { data: categories } = await useFetch('/api/admin/categories')
 const categoryList = computed(() => categories.value?.list || [])
 
-// 获取文章详情（如果是编辑）
-onMounted(async () => {
-  if (!isNew) {
-    const { data } = await useFetch(`/api/admin/posts/${route.params.id}`)
-    if (data.value) {
-      title.value = data.value.title
-      content.value = data.value.content || ''
-      slug.value = data.value.slug || ''
-      description.value = data.value.excerpt || ''
-      coverImage.value = data.value.coverImage || ''
-      published.value = data.value.status === 'published'
-      categoryId.value = data.value.categoryId
-    }
-  }
-})
+async function loadPostDetail() {
+  if (isNew.value) return
+
+  const data = await $fetch(`/api/admin/posts/${route.params.id}`)
+  title.value = data.title
+  content.value = data.content || ''
+  slug.value = data.slug || ''
+  description.value = data.excerpt || ''
+  coverImage.value = data.coverImage || ''
+  published.value = data.status === 'published'
+  categoryId.value = data.categoryId
+}
+
+watch(
+  () => route.params.id,
+  async () => {
+    await loadPostDetail()
+  },
+  { immediate: true },
+)
 
 // 保存文章
 async function savePost() {
@@ -53,7 +62,7 @@ async function savePost() {
       categoryId: categoryId.value
     }
     
-    if (isNew) {
+    if (isNew.value) {
       await $fetch('/api/admin/posts', { method: 'POST', body })
     } else {
       await $fetch(`/api/admin/posts/${route.params.id}`, { method: 'PUT', body })
@@ -94,66 +103,66 @@ async function uploadCover(event: Event) {
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">{{ isNew ? '新建文章' : '编辑文章' }}</h1>
-      <NuxtLink to="/admin/posts" class="text-gray-500 hover:text-gray-700">
+      <h1 class="text-3xl font-bold text-white light:text-gray-900">{{ isNew ? '新建文章' : '编辑文章' }}</h1>
+      <NuxtLink to="/admin/posts" class="text-text-secondary light:text-gray-600 hover:text-accent-purple">
         返回列表
       </NuxtLink>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-[#1a1625] dark:bg-[#1a1625] light:bg-white rounded-xl border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 p-6">
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium mb-1">标题</label>
-          <input v-model="title" type="text" class="w-full border rounded px-3 py-2" placeholder="文章标题" />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium mb-1">Slug</label>
-          <input v-model="slug" type="text" class="w-full border rounded px-3 py-2" placeholder="url-slug" />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium mb-1">描述</label>
-          <textarea v-model="description" class="w-full border rounded px-3 py-2" rows="2" placeholder="文章描述"></textarea>
+          <label class="block text-sm font-medium mb-1 text-white light:text-gray-900">标题</label>
+          <input v-model="title" type="text" class="w-full px-3 py-2 rounded-lg bg-[#0f0c16] dark:bg-[#0f0c16] light:bg-white border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 text-white light:text-gray-900" placeholder="文章标题" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">封面图</label>
+          <label class="block text-sm font-medium mb-1 text-white light:text-gray-900">路径标识（Slug）</label>
+          <input v-model="slug" type="text" class="w-full px-3 py-2 rounded-lg bg-[#0f0c16] dark:bg-[#0f0c16] light:bg-white border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 text-white light:text-gray-900" placeholder="url-slug" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1 text-white light:text-gray-900">描述</label>
+          <textarea v-model="description" class="w-full px-3 py-2 rounded-lg bg-[#0f0c16] dark:bg-[#0f0c16] light:bg-white border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 text-white light:text-gray-900" rows="2" placeholder="文章描述"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1 text-white light:text-gray-900">封面图</label>
           <div class="space-y-3">
-            <input v-model="coverImage" type="text" class="w-full border rounded px-3 py-2" placeholder="封面图 URL（可粘贴或上传）" />
+            <input v-model="coverImage" type="text" class="w-full px-3 py-2 rounded-lg bg-[#0f0c16] dark:bg-[#0f0c16] light:bg-white border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 text-white light:text-gray-900" placeholder="封面图 URL（可粘贴或上传）" />
             <div class="flex items-center gap-3">
-              <label class="inline-flex items-center px-3 py-2 border rounded cursor-pointer hover:bg-gray-50 text-sm">
+              <label class="inline-flex items-center px-3 py-2 border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 rounded cursor-pointer hover:bg-accent-purple/10 text-sm text-text-secondary light:text-gray-700">
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" @change="uploadCover">
                 {{ uploadingCover ? '上传中...' : '上传图片' }}
               </label>
-              <span class="text-xs text-gray-500">支持 JPG / PNG / WebP / GIF，最大 5MB</span>
+              <span class="text-xs text-text-muted light:text-gray-500">支持 JPG / PNG / WebP / GIF，最大 5MB</span>
             </div>
-            <img v-if="coverImage" :src="coverImage" alt="封面预览" class="w-full max-w-md h-40 object-cover rounded border">
+            <img v-if="coverImage" :src="coverImage" alt="封面预览" class="w-full max-w-md h-40 object-cover rounded border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200">
           </div>
         </div>
-        
+
         <div>
-          <label class="block text-sm font-medium mb-1">分类</label>
-          <select v-model="categoryId" class="w-full border rounded px-3 py-2">
+          <label class="block text-sm font-medium mb-1 text-white light:text-gray-900">分类</label>
+          <select v-model="categoryId" class="w-full px-3 py-2 rounded-lg bg-[#0f0c16] dark:bg-[#0f0c16] light:bg-white border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 text-white light:text-gray-900">
             <option :value="null">选择分类</option>
             <option v-for="cat in categoryList" :key="cat.id" :value="cat.id">
               {{ cat.name }}
             </option>
           </select>
         </div>
-        
+
         <div>
-          <label class="block text-sm font-medium mb-1">内容 (Markdown)</label>
-          <textarea v-model="content" class="w-full border rounded px-3 py-2 font-mono" rows="20" placeholder="文章内容"></textarea>
+          <label class="block text-sm font-medium mb-1 text-white light:text-gray-900">内容（Markdown）</label>
+          <textarea v-model="content" class="w-full px-3 py-2 rounded-lg bg-[#0f0c16] dark:bg-[#0f0c16] light:bg-white border border-[#2a2435] dark:border-[#2a2435] light:border-gray-200 text-white light:text-gray-900 font-mono" rows="20" placeholder="文章内容"></textarea>
         </div>
-        
-        <div class="flex items-center">
+
+        <div class="flex items-center text-text-secondary light:text-gray-700">
           <input v-model="published" type="checkbox" id="published" class="mr-2" />
           <label for="published">发布</label>
         </div>
-        
+
         <div class="flex justify-end">
-          <button @click="savePost" :disabled="saving" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
+          <button @click="savePost" :disabled="saving" class="bg-accent-purple text-white px-6 py-2 rounded-lg hover:bg-accent-purple/90 disabled:opacity-50 transition-colors">
             {{ saving ? '保存中...' : '保存' }}
           </button>
         </div>

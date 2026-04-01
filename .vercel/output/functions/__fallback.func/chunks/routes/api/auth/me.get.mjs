@@ -1,7 +1,5 @@
-import { d as defineEventHandler, g as getCookie, c as createError, v as verifyToken } from '../../../nitro/nitro.mjs';
-import { d as db, u as users } from '../../../_/index.mjs';
+import { d as defineEventHandler, g as getCookie, c as createError, v as verifyToken, a as db, u as users } from '../../../nitro/nitro.mjs';
 import { eq } from 'drizzle-orm';
-import 'jose';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -9,12 +7,13 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
-import 'better-sqlite3';
-import 'node:url';
-import 'ipx';
 import 'drizzle-orm/libsql';
 import '@libsql/client';
 import 'drizzle-orm/sqlite-core';
+import 'jose';
+import 'better-sqlite3';
+import 'node:url';
+import 'ipx';
 
 const me_get = defineEventHandler(async (event) => {
   const token = getCookie(event, "auth_token");
@@ -35,6 +34,7 @@ const me_get = defineEventHandler(async (event) => {
     id: users.id,
     username: users.username,
     email: users.email,
+    role: users.role,
     createdAt: users.createdAt
   }).from(users).where(eq(users.id, payload.id));
   if (!user) {

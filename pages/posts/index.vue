@@ -76,18 +76,53 @@ const searchQuery = ref('')
 const activeTag = ref('all')
 const sortBy = ref('latest')
 
-const { data: posts } = await useAsyncData('posts-archive', () =>
-  queryCollection('content')
-    .order('date', 'DESC')
-    .select('title', 'description', 'date', 'tags', 'path', 'readingTime')
-    .all(),
-)
+interface Post {
+  id: number
+  title: string
+  slug: string
+  excerpt?: string | null
+  coverImage?: string | null
+  isFeatured?: boolean
+  isSticky?: boolean
+  viewCount?: number
+  publishedAt?: string | null
+  createdAt?: string | null
+  date?: string
+  category?: {
+    id?: number
+    name?: string | null
+    slug?: string | null
+    color?: string | null
+  } | null
+  tags?: Array<{
+    id?: number
+    name?: string | null
+    slug?: string | null
+    color?: string | null
+  }>
+  path: string
+  description?: string | null
+  readingTime?: string
+}
+
+const { data: postsData } = await useFetch('/api/posts', {
+  query: { pageSize: 100 }
+})
+
+const posts = computed<Post[]>(() => (postsData.value?.list || []).map(post => ({
+  ...post,
+  path: `/posts/${post.slug}`,
+  description: post.excerpt,
+  readingTime: '8 分钟阅读'
+})))
 
 const allTags = computed(() => {
   const set = new Set<string>()
   for (const post of posts.value || []) {
     for (const tag of post.tags || []) {
-      set.add(tag)
+      if (tag.name) {
+        set.add(tag.name)
+      }
     }
   }
   return [...set]
@@ -99,14 +134,16 @@ const filteredPosts = computed(() => {
   let list = [...(posts.value || [])]
 
   if (activeTag.value !== 'all') {
-    list = list.filter(post => (post.tags || []).includes(activeTag.value))
+    list = list.filter(post => 
+      (post.tags || []).some(tag => tag.name === activeTag.value)
+    )
   }
 
   if (keyword) {
     list = list.filter((post) => {
       const title = post.title?.toLowerCase() || ''
       const desc = post.description?.toLowerCase() || ''
-      const tags = (post.tags || []).join(' ').toLowerCase()
+      const tags = (post.tags || []).map(t => t.name).join(' ').toLowerCase()
       return title.includes(keyword) || desc.includes(keyword) || tags.includes(keyword)
     })
   }
@@ -114,9 +151,9 @@ const filteredPosts = computed(() => {
   if (sortBy.value === 'title') {
     list.sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'))
   } else if (sortBy.value === 'oldest') {
-    list.sort((a, b) => Number(new Date(a.date)) - Number(new Date(b.date)))
+    list.sort((a, b) => Number(new Date(a.date || a.createdAt)) - Number(new Date(b.date || b.createdAt)))
   } else {
-    list.sort((a, b) => Number(new Date(b.date)) - Number(new Date(a.date)))
+    list.sort((a, b) => Number(new Date(b.date || b.createdAt)) - Number(new Date(a.date || a.createdAt)))
   }
 
   return list

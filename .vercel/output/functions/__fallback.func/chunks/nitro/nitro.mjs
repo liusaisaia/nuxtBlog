@@ -1,11 +1,15 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { jwtVerify, SignJWT } from 'jose';
-import http from 'node:http';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import http from 'node:http';
 import https from 'node:https';
 import { EventEmitter } from 'node:events';
 import { Buffer as Buffer$1 } from 'node:buffer';
 import { promises, existsSync, mkdirSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { createHash } from 'node:crypto';
+import { drizzle } from 'drizzle-orm/libsql';
+import { relations, sql } from 'drizzle-orm';
+import { createClient } from '@libsql/client';
+import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
+import { jwtVerify, SignJWT } from 'jose';
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'node:url';
 import { ipxFSStorage, ipxHttpStorage, createIPX, createIPXH3Handler } from 'ipx';
@@ -1169,6 +1173,20 @@ function getRequestURL(event, opts = {}) {
     "/"
   );
   return new URL(path, `${protocol}://${host}`);
+}
+function getRequestIP(event, opts = {}) {
+  if (event.context.clientAddress) {
+    return event.context.clientAddress;
+  }
+  if (opts.xForwardedFor) {
+    const xForwardedFor = getRequestHeader(event, "x-forwarded-for")?.split(",").shift()?.trim();
+    if (xForwardedFor) {
+      return xForwardedFor;
+    }
+  }
+  if (event.node.req.socket.remoteAddress) {
+    return event.node.req.socket.remoteAddress;
+  }
 }
 
 const RawBodySymbol = Symbol.for("h3RawBody");
@@ -4468,7 +4486,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "29803225-1aa1-420d-acbf-81f14669ed30",
+    "buildId": "85b08144-cc4a-43dc-ad2d-d57b217d5eb2",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -4988,7 +5006,7 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
-const script = "\"use strict\";(()=>{const t=window,e=document.documentElement,c=[\"dark\",\"light\"],n=getStorageValue(\"localStorage\",\"nuxt-color-mode\")||\"system\";let i=n===\"system\"?u():n;const r=e.getAttribute(\"data-color-mode-forced\");r&&(i=r),l(i),t[\"__NUXT_COLOR_MODE__\"]={preference:n,value:i,getColorScheme:u,addColorScheme:l,removeColorScheme:d};function l(o){const s=\"\"+o+\"\",a=\"theme\";e.classList?e.classList.add(s):e.className+=\" \"+s,a&&e.setAttribute(\"data-\"+a,o)}function d(o){const s=\"\"+o+\"\",a=\"theme\";e.classList?e.classList.remove(s):e.className=e.className.replace(new RegExp(s,\"g\"),\"\"),a&&e.removeAttribute(\"data-\"+a)}function f(o){return t.matchMedia(\"(prefers-color-scheme\"+o+\")\")}function u(){if(t.matchMedia&&f(\"\").media!==\"not all\"){for(const o of c)if(f(\":\"+o).matches)return o}return\"dark\"}})();function getStorageValue(t,e){switch(t){case\"localStorage\":return window.localStorage.getItem(e);case\"sessionStorage\":return window.sessionStorage.getItem(e);case\"cookie\":return getCookie(e);default:return null}}function getCookie(t){const c=(\"; \"+window.document.cookie).split(\"; \"+t+\"=\");if(c.length===2)return c.pop()?.split(\";\").shift()}";
+const script = "\"use strict\";(()=>{const t=window,e=document.documentElement,c=[\"dark\",\"light\"],n=getStorageValue(\"localStorage\",\"nuxt-color-mode\")||\"light\";let i=n===\"system\"?u():n;const r=e.getAttribute(\"data-color-mode-forced\");r&&(i=r),l(i),t[\"__NUXT_COLOR_MODE__\"]={preference:n,value:i,getColorScheme:u,addColorScheme:l,removeColorScheme:d};function l(o){const s=\"\"+o+\"\",a=\"theme\";e.classList?e.classList.add(s):e.className+=\" \"+s,a&&e.setAttribute(\"data-\"+a,o)}function d(o){const s=\"\"+o+\"\",a=\"theme\";e.classList?e.classList.remove(s):e.className=e.className.replace(new RegExp(s,\"g\"),\"\"),a&&e.removeAttribute(\"data-\"+a)}function f(o){return t.matchMedia(\"(prefers-color-scheme\"+o+\")\")}function u(){if(t.matchMedia&&f(\"\").media!==\"not all\"){for(const o of c)if(f(\":\"+o).matches)return o}return\"light\"}})();function getStorageValue(t,e){switch(t){case\"localStorage\":return window.localStorage.getItem(e);case\"sessionStorage\":return window.sessionStorage.getItem(e);case\"cookie\":return getCookie(e);default:return null}}function getCookie(t){const c=(\"; \"+window.document.cookie).split(\"; \"+t+\"=\");if(c.length===2)return c.pop()?.split(\";\").shift()}";
 
 const _oFlbvvczkCPY_vWOGAQzGdRj_PHyeE9puRc3zVrPSQw = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
@@ -4996,9 +5014,323 @@ const _oFlbvvczkCPY_vWOGAQzGdRj_PHyeE9puRc3zVrPSQw = (function(nitro) {
   });
 });
 
+function defineNitroPlugin(def) {
+  return def;
+}
+
+const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  email: text("email"),
+  displayName: text("display_name"),
+  avatar: text("avatar"),
+  role: text("role").default("admin"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+const categories = sqliteTable("categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  color: text("color").default("#3b82f6"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+const tags = sqliteTable("tags", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  color: text("color").default("#10b981"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+const posts = sqliteTable("posts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content"),
+  excerpt: text("excerpt"),
+  coverImage: text("cover_image"),
+  categoryId: integer("category_id").references(() => categories.id),
+  status: text("status").default("draft"),
+  isFeatured: integer("is_featured", { mode: "boolean" }).default(false),
+  isSticky: integer("is_sticky", { mode: "boolean" }).default(false),
+  viewCount: integer("view_count").default(0),
+  publishedAt: integer("published_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+const postTags = sqliteTable("post_tags", {
+  postId: integer("post_id").references(() => posts.id, { onDelete: "cascade" }),
+  tagId: integer("tag_id").references(() => tags.id, { onDelete: "cascade" })
+});
+const pages = sqliteTable("pages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content"),
+  coverImage: text("cover_image"),
+  status: text("status").default("draft"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+const comments = sqliteTable("comments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: integer("post_id").references(() => posts.id, { onDelete: "cascade" }),
+  parentId: integer("parent_id"),
+  authorName: text("author_name").notNull(),
+  authorEmail: text("author_email"),
+  content: text("content").notNull(),
+  status: text("status").default("pending"),
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+const settings = sqliteTable("settings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  key: text("key").notNull().unique(),
+  value: text("value"),
+  type: text("type").default("string"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+const postsRelations = relations(posts, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [posts.categoryId],
+    references: [categories.id]
+  }),
+  postTags: many(postTags)
+}));
+const categoriesRelations = relations(categories, ({ many }) => ({
+  posts: many(posts)
+}));
+const tagsRelations = relations(tags, ({ many }) => ({
+  postTags: many(postTags)
+}));
+const postTagsRelations = relations(postTags, ({ one }) => ({
+  post: one(posts, {
+    fields: [postTags.postId],
+    references: [posts.id]
+  }),
+  tag: one(tags, {
+    fields: [postTags.tagId],
+    references: [tags.id]
+  })
+}));
+const commentsRelations = relations(comments, ({ one }) => ({
+  post: one(posts, {
+    fields: [comments.postId],
+    references: [posts.id]
+  })
+}));
+
+const schema = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  categories: categories,
+  categoriesRelations: categoriesRelations,
+  comments: comments,
+  commentsRelations: commentsRelations,
+  pages: pages,
+  postTags: postTags,
+  postTagsRelations: postTagsRelations,
+  posts: posts,
+  postsRelations: postsRelations,
+  settings: settings,
+  tags: tags,
+  tagsRelations: tagsRelations,
+  users: users
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const localDbFile = join(process.cwd(), "data", "blog.db");
+const localDbUrl = `file:${localDbFile}`;
+function createDbClient() {
+  if (process.env.TURSO_DATABASE_URL) {
+    return createClient({
+      url: process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN
+    });
+  }
+  return createClient({
+    url: localDbUrl
+  });
+}
+const client = createDbClient();
+const db$1 = drizzle(client, { schema });
+const dbDialect = process.env.TURSO_DATABASE_URL ? "turso" : "sqlite-local";
+const dbTarget = process.env.TURSO_DATABASE_URL || localDbUrl;
+let schemaReady = null;
+function ensureLocalSchema() {
+  if (dbDialect !== "sqlite-local") return Promise.resolve();
+  if (schemaReady) return schemaReady;
+  schemaReady = (async () => {
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        email TEXT,
+        display_name TEXT,
+        avatar TEXT,
+        role TEXT DEFAULT 'admin',
+        created_at INTEGER,
+        updated_at INTEGER
+      )
+    `);
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        slug TEXT NOT NULL UNIQUE,
+        description TEXT,
+        color TEXT DEFAULT '#3b82f6',
+        sort_order INTEGER DEFAULT 0,
+        created_at INTEGER,
+        updated_at INTEGER
+      )
+    `);
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS tags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        slug TEXT NOT NULL UNIQUE,
+        color TEXT DEFAULT '#10b981',
+        created_at INTEGER
+      )
+    `);
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        content TEXT,
+        excerpt TEXT,
+        cover_image TEXT,
+        category_id INTEGER,
+        status TEXT DEFAULT 'draft',
+        is_featured INTEGER DEFAULT 0,
+        is_sticky INTEGER DEFAULT 0,
+        view_count INTEGER DEFAULT 0,
+        published_at INTEGER,
+        created_at INTEGER,
+        updated_at INTEGER,
+        FOREIGN KEY (category_id) REFERENCES categories(id)
+      )
+    `);
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS post_tags (
+        post_id INTEGER,
+        tag_id INTEGER,
+        FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        content TEXT,
+        cover_image TEXT,
+        status TEXT DEFAULT 'draft',
+        sort_order INTEGER DEFAULT 0,
+        created_at INTEGER,
+        updated_at INTEGER
+      )
+    `);
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER,
+        parent_id INTEGER,
+        author_name TEXT NOT NULL,
+        author_email TEXT,
+        content TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        ip TEXT,
+        user_agent TEXT,
+        created_at INTEGER,
+        FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+      )
+    `);
+    await db$1.run(sql`
+      CREATE TABLE IF NOT EXISTS settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key TEXT NOT NULL UNIQUE,
+        value TEXT,
+        type TEXT DEFAULT 'string',
+        created_at INTEGER,
+        updated_at INTEGER
+      )
+    `);
+  })();
+  return schemaReady;
+}
+async function checkDbConnection() {
+  await ensureLocalSchema();
+  await db$1.run(sql`select 1`);
+}
+
+const _kvO9NEjfFEH1kHycYHjcH3e789eTe7B4efkxxRPMUTY = defineNitroPlugin(async () => {
+  await ensureLocalSchema();
+});
+
 const plugins = [
-  _oFlbvvczkCPY_vWOGAQzGdRj_PHyeE9puRc3zVrPSQw
+  _oFlbvvczkCPY_vWOGAQzGdRj_PHyeE9puRc3zVrPSQw,
+_kvO9NEjfFEH1kHycYHjcH3e789eTe7B4efkxxRPMUTY
 ];
+
+const DEFAULT_JWT_SECRET = "your-secret-key-change-in-production";
+const jwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
+if (jwtSecret === DEFAULT_JWT_SECRET) {
+  throw new Error("JWT_SECRET \u672A\u914D\u7F6E\uFF0C\u751F\u4EA7\u73AF\u5883\u5DF2\u7981\u6B62\u4F7F\u7528\u9ED8\u8BA4\u5BC6\u94A5");
+}
+const secret = new TextEncoder().encode(jwtSecret);
+async function createToken(user) {
+  return new SignJWT({
+    id: user.id,
+    username: user.username,
+    role: user.role
+  }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("7d").sign(secret);
+}
+async function verifyToken(token) {
+  try {
+    const { payload } = await jwtVerify(token, secret);
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+const ADMIN_ONLY_PREFIXES = [
+  "/api/admin/settings",
+  "/api/admin/categories",
+  "/api/admin/tags"
+];
+const _TUlm58 = defineEventHandler(async (event) => {
+  const path = event.path || event.node.req.url || "";
+  if (!path.startsWith("/api/admin")) {
+    return;
+  }
+  const token = getCookie(event, "auth_token");
+  if (!token) {
+    throw createError$1({ statusCode: 401, message: "\u672A\u767B\u5F55" });
+  }
+  const payload = await verifyToken(token);
+  if (!payload) {
+    throw createError$1({ statusCode: 401, message: "\u767B\u5F55\u5DF2\u8FC7\u671F" });
+  }
+  const role = payload.role || "editor";
+  const isAdminOnly = ADMIN_ONLY_PREFIXES.some((prefix) => path.startsWith(prefix));
+  if (isAdminOnly && role !== "admin") {
+    throw createError$1({ statusCode: 403, message: "\u9700\u8981\u7BA1\u7406\u5458\u6743\u9650" });
+  }
+  if (!["admin", "editor"].includes(role)) {
+    throw createError$1({ statusCode: 403, message: "\u89D2\u8272\u65E0\u6743\u9650\u8BBF\u95EE\u540E\u53F0\u63A5\u53E3" });
+  }
+});
 
 const _SxA8c9 = defineEventHandler(() => {});
 
@@ -5671,23 +6003,49 @@ const queryCollection = (event, collection) => {
   return queryCollection$1(event, collection);
 };
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || "your-secret-key-change-in-production"
-);
-async function createToken(user) {
-  return new SignJWT({
-    id: user.id,
-    username: user.username,
-    role: user.role
-  }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("7d").sign(secret);
+const WINDOW_MS = 10 * 60 * 1e3;
+const BLOCK_MS = 15 * 60 * 1e3;
+const MAX_ATTEMPTS = 5;
+const attempts = /* @__PURE__ */ new Map();
+function now() {
+  return Date.now();
 }
-async function verifyToken(token) {
-  try {
-    const { payload } = await jwtVerify(token, secret);
-    return payload;
-  } catch {
+function normalizeUsername(username) {
+  return (username || "").trim().toLowerCase();
+}
+function keyFor(ip, username) {
+  return `${ip}::${normalizeUsername(username)}`;
+}
+function checkLoginBlocked(ip, username) {
+  const key = keyFor(ip, username);
+  const entry = attempts.get(key);
+  if (!entry) return null;
+  const ts = now();
+  if (entry.blockedUntil && entry.blockedUntil > ts) {
+    return Math.ceil((entry.blockedUntil - ts) / 1e3);
+  }
+  if (entry.firstAt + WINDOW_MS < ts) {
+    attempts.delete(key);
     return null;
   }
+  return null;
+}
+function recordLoginFailure(ip, username) {
+  const key = keyFor(ip, username);
+  const ts = now();
+  const current = attempts.get(key);
+  if (!current || current.firstAt + WINDOW_MS < ts) {
+    attempts.set(key, { count: 1, firstAt: ts });
+    return;
+  }
+  current.count += 1;
+  if (current.count >= MAX_ATTEMPTS) {
+    current.blockedUntil = ts + BLOCK_MS;
+  }
+  attempts.set(key, current);
+}
+function clearLoginFailure(ip, username) {
+  attempts.delete(keyFor(ip, username));
 }
 
 const _laf8gz = eventHandler(async (event) => {
@@ -5723,28 +6081,39 @@ const _lazy_36e7HH = () => import('../routes/api/admin/categories/_id_.delete.mj
 const _lazy_wSRrcK = () => import('../routes/api/admin/categories/_id_.put.mjs');
 const _lazy_LnkvSM = () => import('../routes/api/admin/index.get.mjs');
 const _lazy_WT25RF = () => import('../routes/api/admin/index.post.mjs');
+const _lazy_yUEwTu = () => import('../routes/api/admin/comments/_id_.delete.mjs');
+const _lazy_dWjax4 = () => import('../routes/api/admin/comments/_id_.put.mjs');
+const _lazy_fc1x8N = () => import('../routes/api/admin/index.get2.mjs');
+const _lazy_dkqk1T = () => import('../routes/api/admin/db-status.get.mjs');
 const _lazy_Mp0q54 = () => import('../routes/api/admin/import.post.mjs');
 const _lazy_hbRFlv = () => import('../routes/api/admin/posts/_id_.delete.mjs');
 const _lazy_UUStsi = () => import('../routes/api/admin/posts/_id_.get.mjs');
 const _lazy_iR0eWn = () => import('../routes/api/admin/posts/_id_.put.mjs');
-const _lazy_kkqwZ_ = () => import('../routes/api/admin/index.get2.mjs');
+const _lazy_kkqwZ_ = () => import('../routes/api/admin/index.get3.mjs');
 const _lazy_oQP67V = () => import('../routes/api/admin/index.post2.mjs');
 const _lazy_tq8VYk = () => import('../routes/api/admin/settings.get.mjs');
 const _lazy_VARTxH = () => import('../routes/api/admin/settings.put.mjs');
 const _lazy_AZKpRk = () => import('../routes/api/admin/tags/_id_.delete.mjs');
-const _lazy_K_TCrN = () => import('../routes/api/admin/index.get3.mjs');
+const _lazy_K_TCrN = () => import('../routes/api/admin/index.get4.mjs');
 const _lazy_dTcL2D = () => import('../routes/api/admin/index.post3.mjs');
+const _lazy_7iXCnb = () => import('../routes/api/admin/upload.post.mjs');
 const _lazy_DCdh19 = () => import('../routes/api/auth/login.post.mjs');
 const _lazy_gpDcdW = () => import('../routes/api/auth/logout.post.mjs');
 const _lazy_XB3Ue2 = () => import('../routes/api/auth/me.get.mjs');
+const _lazy_ECNfYf = () => import('../routes/api/health/db.get.mjs');
 const _lazy_0Xu1zP = () => import('../routes/rss.xml.mjs');
 const _lazy_M9aWJY = () => import('../routes/renderer.mjs').then(function (n) { return n.r; });
 
 const handlers = [
+  { route: '', handler: _TUlm58, lazy: false, middleware: true, method: undefined },
   { route: '/api/admin/categories/:id', handler: _lazy_36e7HH, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/categories/:id', handler: _lazy_wSRrcK, lazy: true, middleware: false, method: "put" },
   { route: '/api/admin/categories', handler: _lazy_LnkvSM, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/categories', handler: _lazy_WT25RF, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/comments/:id', handler: _lazy_yUEwTu, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/admin/comments/:id', handler: _lazy_dWjax4, lazy: true, middleware: false, method: "put" },
+  { route: '/api/admin/comments', handler: _lazy_fc1x8N, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/db-status', handler: _lazy_dkqk1T, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/import', handler: _lazy_Mp0q54, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/posts/:id', handler: _lazy_hbRFlv, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/posts/:id', handler: _lazy_UUStsi, lazy: true, middleware: false, method: "get" },
@@ -5756,9 +6125,11 @@ const handlers = [
   { route: '/api/admin/tags/:id', handler: _lazy_AZKpRk, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/tags', handler: _lazy_K_TCrN, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/tags', handler: _lazy_dTcL2D, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/upload', handler: _lazy_7iXCnb, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/login', handler: _lazy_DCdh19, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/logout', handler: _lazy_gpDcdW, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/me', handler: _lazy_XB3Ue2, lazy: true, middleware: false, method: "get" },
+  { route: '/api/health/db', handler: _lazy_ECNfYf, lazy: true, middleware: false, method: "get" },
   { route: '/rss.xml', handler: _lazy_0Xu1zP, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_error', handler: _lazy_M9aWJY, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
@@ -5990,5 +6361,5 @@ const listener = function(req, res) {
   return handler(req, res);
 };
 
-export { $fetch$1 as $, withQuery as A, sanitizeStatusCode as B, getContext as C, baseURL as D, createHooks as E, defu as F, executeAsync as G, parseQuery as H, withTrailingSlash as I, withoutTrailingSlash as J, getRequestHeaders as K, hash$1 as L, pascalCase as M, kebabCase as N, klona as O, parse as P, getRequestHeader as Q, isEqual as R, deleteCookie as S, withLeadingSlash as T, encodeParam as U, listener as V, readMultipartFormData as a, getQuery as b, createError$1 as c, defineEventHandler as d, createToken as e, setResponseHeader as f, getCookie as g, buildAssetsURL as h, getResponseStatusText as i, getResponseStatus as j, defineRenderHandler as k, destr as l, getRouteRules as m, joinURL as n, useNitroApp as o, publicAssetsURL as p, queryCollection as q, readBody as r, setCookie as s, parseURL as t, useRuntimeConfig as u, verifyToken as v, encodePath as w, decodePath as x, hasProtocol as y, isScriptProtocol as z };
+export { $fetch$1 as $, buildAssetsURL as A, useRuntimeConfig as B, getResponseStatusText as C, getResponseStatus as D, defineRenderHandler as E, publicAssetsURL as F, destr as G, getRouteRules as H, joinURL as I, useNitroApp as J, parseURL as K, encodePath as L, decodePath as M, hasProtocol as N, isScriptProtocol as O, withQuery as P, sanitizeStatusCode as Q, getContext as R, baseURL as S, createHooks as T, defu as U, executeAsync as V, getRequestHeaders as W, parseQuery as X, withTrailingSlash as Y, withoutTrailingSlash as Z, hash$1 as _, db$1 as a, pascalCase as a0, kebabCase as a1, klona as a2, parse as a3, getRequestHeader as a4, isEqual as a5, deleteCookie as a6, withLeadingSlash as a7, encodeParam as a8, listener as a9, categories as b, createError$1 as c, defineEventHandler as d, comments as e, getQuery as f, getCookie as g, checkDbConnection as h, dbDialect as i, dbTarget as j, readMultipartFormData as k, postTags as l, getRequestIP as m, checkLoginBlocked as n, recordLoginFailure as o, posts as p, clearLoginFailure as q, readBody as r, settings as s, tags as t, users as u, verifyToken as v, createToken as w, setCookie as x, queryCollection as y, setResponseHeader as z };
 //# sourceMappingURL=nitro.mjs.map

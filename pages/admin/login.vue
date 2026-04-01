@@ -19,30 +19,25 @@ async function handleLogin() {
   error.value = ''
   
   try {
-    const { data, error: fetchError } = await useFetch('/api/auth/login', {
+    console.log('[admin-login] start login request', { username: username.value })
+    await $fetch('/api/auth/login', {
       method: 'POST',
+      credentials: 'include',
       body: {
         username: username.value,
         password: password.value
       }
     })
-    
-    if (fetchError.value) {
-      error.value = fetchError.value.data?.message || '登录失败'
-      return
-    }
-    
-    // 保存 token 到 cookie
-    const token = data.value?.token
-    if (token) {
-      const tokenCookie = useCookie('auth_token', {
-        maxAge: 60 * 60 * 24 * 7 // 7 天
-      })
-      tokenCookie.value = token
-      router.push('/admin')
+
+    console.log('[admin-login] login request succeeded, navigating to /admin/posts')
+    await router.push('/admin/posts')
+    console.log('[admin-login] router.push resolved, current route:', router.currentRoute.value.fullPath)
+    if (router.currentRoute.value.path !== '/admin/posts') {
+      window.location.href = '/admin/posts'
     }
   } catch (e) {
-    error.value = '登录失败，请稍后重试'
+    console.error('[admin-login] login failed', e)
+    error.value = (e as any)?.data?.message || '登录失败，请稍后重试'
   } finally {
     loading.value = false
   }

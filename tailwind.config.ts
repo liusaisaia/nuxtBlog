@@ -70,7 +70,10 @@ export default <Partial<Config>>{
     },
   },
   plugins: [
-    function ({ matchUtilities, theme }: any) {
+    function ({ matchUtilities, theme, addVariant }: any) {
+      // Support `light:` utilities controlled by html:not(.dark)
+      addVariant('light', 'html:not(.dark) &')
+
       matchUtilities(
         {
           'bg-grid': (value: any) => ({
